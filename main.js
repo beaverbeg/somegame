@@ -3,6 +3,7 @@ var htmlCanvas = document.getElementById('c'),
     ctx = htmlCanvas.getContext('2d'),
     raito_height = 1080,
     ratio_width = 1980,
+    
     scaledWidth = window.innerWidth/ratio_width,
     scaledHeight = window.innerHeight/raito_height,
     f = (scaledHeight+scaledWidth)/2,
@@ -12,7 +13,13 @@ var htmlCanvas = document.getElementById('c'),
         a:65,
         d:68
     },
-    pressedKeys = {};
+    pressedKeys = {},
+    platforms = [];
+
+
+randint = function(min, max){return Math.random() * (max - min) + min;};
+htmlCanvas.width = 1280;
+htmlCanvas.height = 720;
 
 
 
@@ -20,18 +27,19 @@ var htmlCanvas = document.getElementById('c'),
 class Player{
     constructor(){
         this.pos = {
-            x: 100,
-            y: 100
+            x: htmlCanvas.width/2,
+            y: htmlCanvas.height-200
         }
         this.size = {
             w: 50,
             h: 50
         }
         this.color = "blue";
-        this.speed = 3;
+        //activates when player is stepping on first platform
+        this.floorislava = false;
         this.onGround = true;
         //force of gravity working for player
-        this.gravityForce = 0.05;
+        this.gravityForce = 0.03;
         //horizontall move slowness when touching the ground IF GREATER THEN STRONGS THEN PLAYER IS SLOWER
         this.moveSlowness = 0.02;
         //horizontall move slowness when un the air IF GREATER THEN STRONGER THEN PLAYER IS SLOWER
@@ -62,7 +70,7 @@ class Player{
         //sets the speed for the player
         this.speed = {
             horizontal: 0.04,
-            vertical: 5
+            vertical: 4.2
         }
         //sets the maximum speed for player
         this.maxSpeed = {
@@ -216,33 +224,55 @@ class Player{
 }
 class Platform{
     constructor(){
-        var pos = {
-            x: 500,
-            y: -100
-        }
-        var velocity = {
+        this.color = "black";
+        this.velocity = {
             x: 0,
-            y: 10
+            y: 0.5
         }
-        var size = {
+        this.size = {
+            w: 200,
+            h: 20
+        }
+        this.pos = {
+            x: randint(10, htmlCanvas.width-this.size.w-10),
+            y: 100
+        }
+    }
+    draw(){
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.pos.x, this.pos.y, this.size.w, this.size.h);
+    }
+    update(){
+        this.pos.y += this.velocity.y;
+        this.pos.x += this.velocity.x;
 
+        if(this.pos.y>htmlCanvas.height+10){
+            this.pos.y = -10;
+            this.pos.x = randint(10, htmlCanvas.width-this.size.w-10);
         }
+
     }
 }
 //calling classes
+const platform = new Platform();
 const player = new Player();
+
+
 
 
 //GAME FUNCTIONS
 function update(){
+    platform.update();
     player.update();
     redraw();
 }
 function redraw() {
     ctx.clearRect(0, 0, htmlCanvas.width, htmlCanvas.height);
     ctx.beginPath();
-    
+
     player.draw();
+    platform.draw();
+    
 
     ctx.stroke();
 }
@@ -272,10 +302,6 @@ function redraw() {
     }, false);
     window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
     window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
-
-    //canvas sizes
-    htmlCanvas.width = 1280;
-    htmlCanvas.height = 720;
 
 
     loop();
