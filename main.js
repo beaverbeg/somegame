@@ -70,7 +70,7 @@ class Player{
         //sets the speed for the player
         this.speed = {
             horizontal: 0.04,
-            vertical: 4.2
+            vertical: 3.5
         }
         //sets the maximum speed for player
         this.maxSpeed = {
@@ -140,7 +140,7 @@ class Player{
             this.onGround = false;
         }
 
-        //SIDES
+        //SIDES switching
         //this shitty math took me 20 min of hard thinking (yeah im dumb)
             //left
             if(this.sides.left<0){
@@ -225,36 +225,56 @@ class Player{
 class Platform{
     constructor(){
         this.color = "black";
+        this.nextPlatformGap = 200;
+        this.childcreated = false;
+        this.gapSize = 250;
+        this.gapPos = randint(10, htmlCanvas.width-10);
         this.velocity = {
             x: 0,
             y: 0.5
         }
         this.size = {
-            w: 200,
+            w: htmlCanvas.width,
+            h: 20
+        }
+        this.size2 = {
+            w: htmlCanvas.width,
             h: 20
         }
         this.pos = {
-            x: randint(10, htmlCanvas.width-this.size.w-10),
-            y: 100
+            x: this.gapPos-this.gapSize/2 - this.size.w, 
+            y: -30
+        }
+        this.pos2 = {
+            x: this.gapPos+this.gapSize/2,
+            y: -30
         }
     }
     draw(){
         ctx.fillStyle = this.color;
         ctx.fillRect(this.pos.x, this.pos.y, this.size.w, this.size.h);
+        ctx.fillRect(this.pos2.x, this.pos2.y,this.size2.w,this.size2.h);
     }
     update(){
         this.pos.y += this.velocity.y;
         this.pos.x += this.velocity.x;
+        this.pos2.y += this.velocity.y;
+        this.pos2.x += this.velocity.x;
 
+        if(this.pos.y>=this.nextPlatformGap){
+            if(this.childcreated==false){
+                platforms.push(new Platform()); 
+                this.childcreated = true;
+            }
+        }
         if(this.pos.y>htmlCanvas.height+10){
-            this.pos.y = -10;
-            this.pos.x = randint(10, htmlCanvas.width-this.size.w-10);
+            platforms.shift();
         }
 
     }
 }
 //calling classes
-const platform = new Platform();
+platforms.push(new Platform()); 
 const player = new Player();
 
 
@@ -262,8 +282,14 @@ const player = new Player();
 
 //GAME FUNCTIONS
 function update(){
-    platform.update();
     player.update();
+    
+    var i = 0
+    while(i<platforms.length){
+        platforms[i].update()
+        i++;
+    }
+
     redraw();
 }
 function redraw() {
@@ -271,7 +297,13 @@ function redraw() {
     ctx.beginPath();
 
     player.draw();
-    platform.draw();
+
+    var i = 0
+    while(i<platforms.length){
+        platforms[i].draw()
+        i++;
+    }
+
     
 
     ctx.stroke();
