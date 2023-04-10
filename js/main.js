@@ -249,6 +249,12 @@ class Platform{
             x: this.gapPos+this.gapSize/2,
             y: -30
         }
+        this.sides1 = {
+
+        }
+        this.sides2 = {
+            
+        }
     }
     draw(){
         ctx.fillStyle = this.color;
@@ -278,7 +284,33 @@ platforms.push(new Platform());
 const player = new Player();
 
 
+//COLLISION
+    //direction of colliding is assigned to ractange 1
+function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom, rac2Left, rac2Right){
+    var ar = {
+        isColliding: false,
+        direction: "none"
+    };
 
+    if(rac1Bottom<rac2Top && !rac1Bottom<rac2Bottom){
+        ar.isColliding = true;
+        ar.direction = "up";
+    }
+    else if(rac1Top>rac2Bottom && !rac1Top>rac2Top){
+        ar.isColliding = true;
+        ar.direction = "down";
+    }
+    else if(rac1Right>rac2Left && !rac1Right>rac2Right){
+        ar.isColliding = true;
+        ar.direction = "left";
+    }
+    else if(rac1Left<rac2Right && !rac1Left<rac2Left){
+        ar.isColliding = true;
+        ar.direction = "right";
+    }
+
+    return ar;
+}
 
 //GAME FUNCTIONS
 function update(){
@@ -311,29 +343,29 @@ function redraw() {
 
 
 
-    //Game loop function
-    loop = function(){
-        setTimeout(()=>{
-            update();
-            loop();
-        },5)
-    }
+//Game loop function
+loop = function(){
+    setTimeout(()=>{
+        update();
+        loop();
+    },5)
+}
 
 
-    //window listeners
-    window.addEventListener('resize', ()=>{
-        /*scaledWidth = window.innerWidth/ratio_width,
-        scaledHeight = window.innerHeight/raito_height;
+//window listeners
+window.addEventListener('resize', ()=>{
+    /*scaledWidth = window.innerWidth/ratio_width,
+    scaledHeight = window.innerHeight/raito_height;
 
-        f = (scaledHeight+scaledWidth)/2;
+    f = (scaledHeight+scaledWidth)/2;
 
-        htmlCanvas.width = window.innerWidth;
-        htmlCanvas.height = window.innerHeight;
+    htmlCanvas.width = window.innerWidth;
+    htmlCanvas.height = window.innerHeight;
 
-        console.log("Window Height: "+window.innerHeight + ",  Window Width:" +window.innerWidth + ", scale factor: "+f);*/
-    }, false);
-    window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
-    window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
+    console.log("Window Height: "+window.innerHeight + ",  Window Width:" +window.innerWidth + ", scale factor: "+f);*/
+}, false);
+window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
+window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
 
 
-    loop();
+loop();
