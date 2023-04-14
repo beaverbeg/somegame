@@ -26,6 +26,8 @@ htmlCanvas.height = 720;
 //CLASS
 class Player{
     constructor(){
+        this.moveable = true;
+        this.clip = true;
         this.pos = {
             x: htmlCanvas.width/2,
             y: htmlCanvas.height-200
@@ -90,28 +92,30 @@ class Player{
     }
     update(){
         //if player is on the ground than move slowness is the ground one
-        if(this.onGround == true){
-            //for left (velocity on -)
-            if(this.velocity.x>0){
-                this.velocity.x -= this.moveSlowness;
+        if(this.clip==true){
+            if(this.onGround == true){
+                //for left (velocity on -)
+                if(this.velocity.x>0){
+                    this.velocity.x -= this.moveSlowness;
+                }
+                //for right (velocity on +)
+                else if(this.velocity.x<0){
+                    this.velocity.x += this.moveSlowness;
+                }
             }
-            //for right (velocity on +)
-            else if(this.velocity.x<0){
-                this.velocity.x += this.moveSlowness;
-            }
-        }
-        //if player isn't on the ground than move slowness is the air one
-        if(this.onGround == false){
-            //player isn'y on the ground so gravity force is working on players y velocity
-            this.velocity.y += this.gravityForce;
-
-            //for left (velocity on -)
-            if(this.velocity.x>0){
-                this.velocity.x -= this.airmoveSlowness;
-            }
-            //for right (velocity on +)
-            else if(this.velocity.x<0){
-                this.velocity.x += this.airmoveSlowness;
+            //if player isn't on the ground than move slowness is the air one
+            if(this.onGround == false){
+                //player isn'y on the ground so gravity force is working on players y velocity
+                this.velocity.y += this.gravityForce;
+    
+                //for left (velocity on -)
+                if(this.velocity.x>0){
+                    this.velocity.x -= this.airmoveSlowness;
+                }
+                //for right (velocity on +)
+                else if(this.velocity.x<0){
+                    this.velocity.x += this.airmoveSlowness;
+                }
             }
         }
 
@@ -199,25 +203,27 @@ class Player{
 
 
         //KEYS
-        if(pressedKeys[codes.w]==true){
-            //he is acually jumping not flying up
-            if(this.onGround==true){
-                //only when player hasn't reached vertical max speed
-                if(this.maxSpeed.vertical>this.velocity.y){
-                    this.velocity.y -= this.speed.vertical;
+        if(this.moveable==true){
+            if(pressedKeys[codes.w]==true){
+                //he is acually jumping not flying up
+                if(this.onGround==true){
+                    //only when player hasn't reached vertical max speed
+                    if(this.maxSpeed.vertical>this.velocity.y){
+                        this.velocity.y -= this.speed.vertical;
+                    }
                 }
             }
-        }
-        if(pressedKeys[codes.a]==true){
-            //only when player hasn't reached horizontal max speed (for left -)
-            if(this.maxSpeed.horizontalMinus<this.velocity.x){
-                this.velocity.x -= this.speed.horizontal;
+            if(pressedKeys[codes.a]==true){
+                //only when player hasn't reached horizontal max speed (for left -)
+                if(this.maxSpeed.horizontalMinus<this.velocity.x){
+                    this.velocity.x -= this.speed.horizontal;
+                }
             }
-        }
-        if(pressedKeys[codes.d]==true){
-            //only when player hasn't reached horizontal max speed (for right +)
-            if(this.maxSpeed.horizontalPlus>this.velocity.x){
-                this.velocity.x += this.speed.horizontal;
+            if(pressedKeys[codes.d]==true){
+                //only when player hasn't reached horizontal max speed (for right +)
+                if(this.maxSpeed.horizontalPlus>this.velocity.x){
+                    this.velocity.x += this.speed.horizontal;
+                }
             }
         }
     }
@@ -282,6 +288,11 @@ class Platform{
 //calling classes
 platforms.push(new Platform()); 
 const player = new Player();
+const player2 = new Player();
+//for collision testing
+player2.moveable = false;
+player2.color = "red";
+player2.clip = false;
 
 
 //COLLISION
@@ -292,21 +303,21 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
         direction: "none"
     };
 
-    if(rac1Bottom<rac2Top && !rac1Bottom<rac2Bottom){
+    if(rac1Bottom>rac2Top && rac1Bottom<rac2Bottom){
         ar.isColliding = true;
         ar.direction = "up";
     }
-    else if(rac1Top>rac2Bottom && !rac1Top>rac2Top){
+    if(rac1Top<rac2Bottom && rac1Top>rac2Top){
         ar.isColliding = true;
         ar.direction = "down";
     }
-    else if(rac1Right>rac2Left && !rac1Right>rac2Right){
-        ar.isColliding = true;
-        ar.direction = "left";
-    }
-    else if(rac1Left<rac2Right && !rac1Left<rac2Left){
+    if(rac1Left<rac2Right && rac1Left>rac2Left){
         ar.isColliding = true;
         ar.direction = "right";
+    }
+    if(rac1Right>rac2Left && rac1Right<rac2Right){
+        ar.isColliding = true;
+        ar.direction = "left";
     }
 
     return ar;
@@ -315,11 +326,17 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
 //GAME FUNCTIONS
 function update(){
     player.update();
+    player2.update();
     
     var i = 0
     while(i<platforms.length){
         platforms[i].update()
         i++;
+    }
+
+    //colliding test
+    if(colliding(player.sides.top, player.sides.bottom, player.sides.left, player.sides.right, player2.sides.top, player2.sides.bottom, player2.sides.left, player2.sides.right).isColliding==true){
+        console.log(colliding(player.sides.top, player.sides.bottom, player.sides.left, player.sides.right, player2.sides.top, player2.sides.bottom, player2.sides.left, player2.sides.right).direction);
     }
 
     redraw();
@@ -329,12 +346,14 @@ function redraw() {
     ctx.beginPath();
 
     player.draw();
+    player2.draw();
 
-    var i = 0
+    //removed platforms for collision testing
+    /*var i = 0
     while(i<platforms.length){
         platforms[i].draw()
         i++;
-    }
+    }*/
 
     
 
