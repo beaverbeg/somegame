@@ -302,7 +302,11 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
         isColliding: false,
         direction: "none"
     };
+    if(rac1Bottom>rac2Top && rac1Top<rac2Bottom && rac1Left<rac2Right && rac1Right>rac2Left){
+        ar.isColliding = true;
+    }
 
+    /*
     if(rac1Bottom>rac2Top && rac1Bottom<rac2Bottom){
         ar.isColliding = true;
         ar.direction = "up";
@@ -318,7 +322,7 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
     if(rac1Right>rac2Left && rac1Right<rac2Right){
         ar.isColliding = true;
         ar.direction = "left";
-    }
+    }*/
 
     return ar;
 }
