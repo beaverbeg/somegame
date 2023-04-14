@@ -306,7 +306,7 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
         ar.isColliding = true;
     }
 
-    /*
+    /* shit not working
     if(rac1Bottom>rac2Top && rac1Bottom<rac2Bottom){
         ar.isColliding = true;
         ar.direction = "up";
