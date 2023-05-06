@@ -85,7 +85,6 @@ class Player{
         ctx.fillStyle = this.color;
         ctx.fillRect(this.pos.x, this.pos.y, this.size.w, this.size.h);
         if(this.mirror==true){
-            ctx.fillStyle = "red";
             ctx.fillRect(this.mirror_pos.x, this.mirror_pos.y, this.mirror_size.w, this.mirror_size.h);
         }
         
@@ -289,7 +288,7 @@ class Platform{
 platforms.push(new Platform()); 
 const player = new Player();
 const player2 = new Player();
-//for collision testing
+//COLLISION TESTING (delete if needed)
 player2.moveable = false;
 player2.color = "red";
 player2.clip = false;
@@ -304,6 +303,34 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
     };
     if(rac1Bottom>rac2Top && rac1Top<rac2Bottom && rac1Left<rac2Right && rac1Right>rac2Left){
         ar.isColliding = true;
+        var gapLeft, gapRight, gapTop, gapBottom;
+        var attachedX = {side:"none", diff: 0};
+        var attachedY = {side:"none", diff: 0};
+        //check which direction is closer to be out of ractangle 2 and set the direction
+        //GAP: how much is ractange 1 side away from leaving ractabgle 2 on its direction
+        
+        gapLeft = rac1Left - rac2Left;
+        gapRight = rac2Right - rac1Right;
+        gapTop = rac1Top - rac2Top;
+        gapBottom = rac2Bottom - rac1Bottom;
+
+        //!!!!!!
+        //for later:
+        //set the gap diffrence so we can tell if rac1 should go up, down or left,right (the closest to leave rac2 will be chosen)
+
+        //X
+        if(gapRight>gapLeft){attachedX.side = "left";}
+        if(gapRight<gapLeft){attachedX.side = "right";}
+        if(gapRight==gapLeft){attachedX.side = "centered";} 
+        
+        //Y
+        if(gapTop>gapBottom){attachedY.side = "bottom";}
+        if(gapTop<gapBottom){attachedY.side = "top";}
+        if(gapTop==gapBottom){attachedY.side = "centered";} 
+
+
+        console.log("gap left: "+gapLeft+"\ngap right: "+gapRight+"\ngap Top: "+gapTop+"\ngap bottom: "+gapBottom);
+        console.log("Should be: "+attachedX.side+" or "+attachedY.side);
     }
 
     /* shit not working
@@ -338,7 +365,7 @@ function update(){
         i++;
     }
 
-    //colliding test
+    //COLLISION TESTING (delete if needed)  
     if(colliding(player.sides.top, player.sides.bottom, player.sides.left, player.sides.right, player2.sides.top, player2.sides.bottom, player2.sides.left, player2.sides.right).isColliding==true){
         console.log(colliding(player.sides.top, player.sides.bottom, player.sides.left, player.sides.right, player2.sides.top, player2.sides.bottom, player2.sides.left, player2.sides.right).direction);
     }
@@ -352,7 +379,7 @@ function redraw() {
     player.draw();
     player2.draw();
 
-    //removed platforms for collision testing
+    //REMOVED FOR COLLISION TESTING
     /*var i = 0
     while(i<platforms.length){
         platforms[i].draw()
