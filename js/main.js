@@ -22,6 +22,18 @@ htmlCanvas.width = 1280;
 htmlCanvas.height = 720;
 
 
+//!!!!
+//!!!!
+//!!!!
+//!!!!
+//!!!!
+//!!!!
+//FOR LATER implement collision testing to player and platforrms (spikes in the future)
+//!!!!
+//!!!!
+//!!!!
+//!!!!
+//!!!!
 
 //CLASS
 class Player{
@@ -290,6 +302,7 @@ const player = new Player();
 const player2 = new Player();
 //COLLISION TESTING (delete if needed)
 player2.moveable = false;
+player2.size.w = 200;
 player2.color = "red";
 player2.clip = false;
 
@@ -301,55 +314,48 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
         isColliding: false,
         direction: "none"
     };
+    var sizeX = rac1Right - rac1Left;
+    var sizeY = rac1Bottom - rac1Top;
+    var size2X = rac2Right - rac2Left;
+    var size2Y = rac2Bottom - rac2Top;
     if(rac1Bottom>rac2Top && rac1Top<rac2Bottom && rac1Left<rac2Right && rac1Right>rac2Left){
         ar.isColliding = true;
+        //diffrence is percent (w ulamku dziesietnym) of rac1 is away from rac2;
         var gapLeft, gapRight, gapTop, gapBottom;
-        var attachedX = {side:"none", diff: 0};
-        var attachedY = {side:"none", diff: 0};
+        var attachedX = {direction:"none", diff: 0};
+        var attachedY = {direction:"none", diff: 0};
         //check which direction is closer to be out of ractangle 2 and set the direction
         //GAP: how much is ractange 1 side away from leaving ractabgle 2 on its direction
+        //gap diffrence can tell if rac1 should go left, right or up, down
         
         gapLeft = rac1Left - rac2Left;
         gapRight = rac2Right - rac1Right;
         gapTop = rac1Top - rac2Top;
         gapBottom = rac2Bottom - rac1Bottom;
 
-        //!!!!!!
-        //for later:
-        //set the gap diffrence so we can tell if rac1 should go up, down or left,right (the closest to leave rac2 will be chosen)
-
         //X
-        if(gapRight>gapLeft){attachedX.side = "left";}
-        if(gapRight<gapLeft){attachedX.side = "right";}
-        if(gapRight==gapLeft){attachedX.side = "centered";} 
+        if(gapRight>gapLeft){attachedX.direction = "left"; attachedX.diff = 1*gapRight/size2X;}
+        if(gapRight<gapLeft){attachedX.direction = "right"; attachedX.diff = 1*gapLeft/size2X;}
+        if(gapRight==gapLeft){attachedX.direction = "centered";} 
         
         //Y
-        if(gapTop>gapBottom){attachedY.side = "bottom";}
-        if(gapTop<gapBottom){attachedY.side = "top";}
-        if(gapTop==gapBottom){attachedY.side = "centered";} 
+        if(gapTop>gapBottom){attachedY.direction = "bottom"; attachedY.diff = 1*gapTop/size2Y;}
+        if(gapTop<gapBottom){attachedY.direction = "top"; attachedY.diff = 1*gapBottom/size2Y;}
+        if(gapTop==gapBottom){attachedY.direction = "centered"; attachedY.diff = 0.1;} 
 
 
-        console.log("gap left: "+gapLeft+"\ngap right: "+gapRight+"\ngap Top: "+gapTop+"\ngap bottom: "+gapBottom);
-        console.log("Should be: "+attachedX.side+" or "+attachedY.side);
-    }
+        //final direction choosing
+        if(attachedX.diff>attachedY.diff){
+            ar.direction = attachedX.direction;
+        }
+        else if(attachedX.diff<attachedY.diff){
+            ar.direction = attachedY.direction;
+        }
+        else{
+            console.log("How did we get here?");
+        }
 
-    /* shit not working
-    if(rac1Bottom>rac2Top && rac1Bottom<rac2Bottom){
-        ar.isColliding = true;
-        ar.direction = "up";
     }
-    if(rac1Top<rac2Bottom && rac1Top>rac2Top){
-        ar.isColliding = true;
-        ar.direction = "down";
-    }
-    if(rac1Left<rac2Right && rac1Left>rac2Left){
-        ar.isColliding = true;
-        ar.direction = "right";
-    }
-    if(rac1Right>rac2Left && rac1Right<rac2Right){
-        ar.isColliding = true;
-        ar.direction = "left";
-    }*/
 
     return ar;
 }
