@@ -28,7 +28,7 @@ htmlCanvas.height = 720;
 //!!!!
 //!!!!
 //!!!!
-//FOR LATER implement collision testing to player and platforrms (spikes in the future)
+//FOR LATER make player act if touching with platforms
 //!!!!
 //!!!!
 //!!!!
@@ -129,6 +129,28 @@ class Player{
                 }
             }
         }
+        //COLLISION
+        var i = 0
+        while(i<platforms.length){
+            var plat = platforms[i];
+            var ar = colliding(this.sides.top, this.sides.bottom, this.sides.left, this.sides.right,
+                plat.sides.top, plat.sides.bottom, 
+                plat.sides.left, plat.sides.right);
+            var ar2 = colliding(this.sides.top, this.sides.bottom, this.sides.left, this.sides.right,
+                plat.sides2.top, plat.sides2.bottom, 
+                plat.sides2.left, plat.sides2.right);
+
+            var collider;
+            if(ar.isColliding==true){  
+                collider = ar;
+            }
+            if(ar2.isColliding==true){  
+                collider = ar2;
+            }
+
+            
+            i = i + 1;
+          }
 
         //move player with its acceleration
         this.pos.y += this.velocity.y;
@@ -266,11 +288,17 @@ class Platform{
             x: this.gapPos+this.gapSize/2,
             y: -30
         }
-        this.sides1 = {
-
+        this.sides = {
+            bottom: this.pos.y +this.size.h,
+            top: this.pos.y,
+            left: this.pos.x,
+            right: this.pos.x + this.size.w
         }
         this.sides2 = {
-            
+            bottom: this.pos2.y +this.size2.h,
+            top: this.pos2.y,
+            left: this.pos2.x,
+            right: this.pos2.x + this.size2.w
         }
     }
     draw(){
@@ -279,6 +307,21 @@ class Platform{
         ctx.fillRect(this.pos2.x, this.pos2.y,this.size2.w,this.size2.h);
     }
     update(){
+        //updating sides
+        this.sides = {
+            bottom: this.pos.y +this.size.h,
+            top: this.pos.y,
+            left: this.pos.x,
+            right: this.pos.x + this.size.w
+        }
+        this.sides2 = {
+            bottom: this.pos2.y +this.size2.h,
+            top: this.pos2.y,
+            left: this.pos2.x,
+            right: this.pos2.x + this.size2.w
+        }
+
+
         this.pos.y += this.velocity.y;
         this.pos.x += this.velocity.x;
         this.pos2.y += this.velocity.y;
@@ -299,13 +342,6 @@ class Platform{
 //calling classes
 platforms.push(new Platform()); 
 const player = new Player();
-const player2 = new Player();
-//COLLISION TESTING (delete if needed)
-player2.moveable = false;
-player2.size.w = 200;
-player2.color = "red";
-player2.clip = false;
-
 
 //COLLISION
     //direction of colliding is assigned to ractange 1
@@ -325,7 +361,7 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
         var attachedX = {direction:"none", diff: 0};
         var attachedY = {direction:"none", diff: 0};
         //check which direction is closer to be out of ractangle 2 and set the direction
-        //GAP: how much is ractange 1 side away from leaving ractabgle 2 on its direction
+        //GAP: how much is ractange 1 side away from leaving ractabg le 2 on its direction
         //gap diffrence can tell if rac1 should go left, right or up, down
         
         gapLeft = rac1Left - rac2Left;
@@ -355,15 +391,13 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
             console.log("How did we get here?");
         }
 
-    }
+    }   
 
     return ar;
 }
 
 //GAME FUNCTIONS
 function update(){
-    player.update();
-    player2.update();
     
     var i = 0
     while(i<platforms.length){
@@ -371,10 +405,7 @@ function update(){
         i++;
     }
 
-    //COLLISION TESTING (delete if needed)  
-    if(colliding(player.sides.top, player.sides.bottom, player.sides.left, player.sides.right, player2.sides.top, player2.sides.bottom, player2.sides.left, player2.sides.right).isColliding==true){
-        console.log(colliding(player.sides.top, player.sides.bottom, player.sides.left, player.sides.right, player2.sides.top, player2.sides.bottom, player2.sides.left, player2.sides.right).direction);
-    }
+    player.update();
 
     redraw();
 }
@@ -382,16 +413,14 @@ function redraw() {
     ctx.clearRect(0, 0, htmlCanvas.width, htmlCanvas.height);
     ctx.beginPath();
 
-    player.draw();
-    player2.draw();
 
-    //REMOVED FOR COLLISION TESTING
-    /*var i = 0
+    var i = 0
     while(i<platforms.length){
         platforms[i].draw()
         i++;
-    }*/
+    }
 
+    player.draw();
     
 
     ctx.stroke();
