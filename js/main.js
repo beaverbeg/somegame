@@ -129,7 +129,10 @@ class Player{
                 }
             }
         }
+
         //COLLISION
+        var collider;
+        //collision loop
         var i = 0
         while(i<platforms.length){
             var plat = platforms[i];
@@ -140,17 +143,37 @@ class Player{
                 plat.sides2.top, plat.sides2.bottom, 
                 plat.sides2.left, plat.sides2.right);
 
-            var collider;
             if(ar.isColliding==true){  
                 collider = ar;
             }
             if(ar2.isColliding==true){  
                 collider = ar2;
             }
+            //direction diffrence in wrong in collison funcion (to fix)
+            //powinno byc im mnie brakuje pixeli nie a jakias srednia gowno w ulamku zwyklym
+            if(collider){
+                if(collider.direction=="top"){
+                    this.velocity.vertical = 0;
+                    this.pos.y = collider.top-this.size.h;
+                }
+                else if(collider.direction=="bottom"){
+                    this.velocity.vertical = 0;
+                    this.pos.y = collider.bottom+0.1;
+                }
+                /*else if(collider.direction=="left"){
+                    this.pos.x -= 0.1;
+                    this.velocity.horizontal = 0;
+                }
+                else if(collider.direction=="right"){
+                    this.pos.x += 0.1;
+                    this.velocity.horizontal = 0;
+                }*/
 
+            }
             
             i = i + 1;
-          }
+        }
+
 
         //move player with its acceleration
         this.pos.y += this.velocity.y;
@@ -174,7 +197,7 @@ class Player{
         }
         //if bottom isn't touching ground
         if(this.sides.bottom < htmlCanvas.height){
-            this.onGround = false;
+            //this.onGround = false;
         }
 
         //SIDES switching
@@ -243,6 +266,7 @@ class Player{
                     //only when player hasn't reached vertical max speed
                     if(this.maxSpeed.vertical>this.velocity.y){
                         this.velocity.y -= this.speed.vertical;
+                        this.onGround = false;
                     }
                 }
             }
@@ -348,7 +372,11 @@ const player = new Player();
 function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom, rac2Left, rac2Right){
     var ar = {
         isColliding: false,
-        direction: "none"
+        direction: "none",
+        top: rac2Top,
+        bottom: rac2Bottom,
+        left: rac2Left,
+        right: rac2Right
     };
     var sizeX = rac1Right - rac1Left;
     var sizeY = rac1Bottom - rac1Top;
