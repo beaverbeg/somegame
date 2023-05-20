@@ -150,7 +150,7 @@ class Player{
             if(ar2.isColliding==true){  
                 collider = ar2;
             }
-            //TO FIX: while player stays at platform it slowly going down
+            //TO FIX: while player stays at platform he is slowly going down
             if(collider){
                 if(collider.direction=="top"){
                     this.pos.y = collider.top-this.size.h;
