@@ -104,8 +104,11 @@ class Player{
     update(){
         //if player is on the ground than move slowness is the ground one
         if(this.clip==true){
+            //GRAVITY AND VELOCITY CHANGERS
+            this.velocity.y += this.gravityForce;
             if(this.onGround == true){
                 //for left (velocity on -)
+                
                 if(this.velocity.x>0){
                     this.velocity.x -= this.moveSlowness;
                 }
@@ -116,8 +119,6 @@ class Player{
             }
             //if player isn't on the ground than move slowness is the air one
             if(this.onGround == false){
-                //player isn'y on the ground so gravity force is working on players y velocity
-                this.velocity.y += this.gravityForce;
     
                 //for left (velocity on -)
                 if(this.velocity.x>0){
@@ -149,22 +150,26 @@ class Player{
             if(ar2.isColliding==true){  
                 collider = ar2;
             }
+            //TO FIX: while player stays at platform it slowly going down
             if(collider){
                 if(collider.direction=="top"){
-                    this.velocity.vertical = 0;
                     this.pos.y = collider.top-this.size.h;
+                    this.onGround = true;
                 }
                 else if(collider.direction=="bottom"){
-                    this.velocity.vertical = 0;
-                    this.pos.y = collider.bottom+0.1;
+                    this.velocity.y = 1;
+                    this.pos.y = collider.bottom+1;
                 }
                 else if(collider.direction=="left"){
                     this.pos.x -= 0.1;
-                    this.velocity.horizontal = 0;
+                    this.velocity.x = 0;
                 }
                 else if(collider.direction=="right"){
                     this.pos.x += 0.1;
-                    this.velocity.horizontal = 0;
+                    this.velocity.x = 0;
+                }
+                else{
+                    this.onGround = false;
                 }
 
             }
@@ -199,7 +204,6 @@ class Player{
         }
 
         //SIDES switching
-        //this shitty math took me 20 min of hard thinking (yeah im dumb)
             //left
             if(this.sides.left<0){
                 //if player fully goes to side player will apear on other side (right)
@@ -234,7 +238,7 @@ class Player{
             //if not
             else{
                 this.mirror = false;
-                //prevending the show of the lagged position of mirror, so small doesnt mirror apears in wrong side
+                //prevending the show of the lagged position of mirror, so the small mirror doesnt apears in wrong side
                 this.mirror_size.w = 0;
                 this.mirror_size.h = 0;
                 this.mirror_pos.x = 0;
@@ -263,6 +267,9 @@ class Player{
                 if(this.onGround==true){
                     //only when player hasn't reached vertical max speed
                     if(this.maxSpeed.vertical>this.velocity.y){
+                        //resets velocity to provite new one
+                        this.velocity.y = 0;
+
                         this.velocity.y -= this.speed.vertical;
                         this.onGround = false;
                     }
