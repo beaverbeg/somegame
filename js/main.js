@@ -149,8 +149,6 @@ class Player{
             if(ar2.isColliding==true){  
                 collider = ar2;
             }
-            //direction diffrence in wrong in collison funcion (to fix)
-            //powinno byc im mnie brakuje pixeli nie a jakias srednia gowno w ulamku zwyklym
             if(collider){
                 if(collider.direction=="top"){
                     this.velocity.vertical = 0;
@@ -160,14 +158,14 @@ class Player{
                     this.velocity.vertical = 0;
                     this.pos.y = collider.bottom+0.1;
                 }
-                /*else if(collider.direction=="left"){
+                else if(collider.direction=="left"){
                     this.pos.x -= 0.1;
                     this.velocity.horizontal = 0;
                 }
                 else if(collider.direction=="right"){
                     this.pos.x += 0.1;
                     this.velocity.horizontal = 0;
-                }*/
+                }
 
             }
             
@@ -384,13 +382,10 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
     var size2Y = rac2Bottom - rac2Top;
     if(rac1Bottom>rac2Top && rac1Top<rac2Bottom && rac1Left<rac2Right && rac1Right>rac2Left){
         ar.isColliding = true;
-        //diffrence is percent (w ulamku dziesietnym) of rac1 is away from rac2;
         var gapLeft, gapRight, gapTop, gapBottom;
         var attachedX = {direction:"none", diff: 0};
         var attachedY = {direction:"none", diff: 0};
         //check which direction is closer to be out of ractangle 2 and set the direction
-        //GAP: how much is ractange 1 side away from leaving ractabg le 2 on its direction
-        //gap diffrence can tell if rac1 should go left, right or up, down
         
         gapLeft = rac1Left - rac2Left;
         gapRight = rac2Right - rac1Right;
@@ -398,26 +393,30 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
         gapBottom = rac2Bottom - rac1Bottom;
 
         //X
-        if(gapRight>gapLeft){attachedX.direction = "left"; attachedX.diff = 1*gapRight/size2X;}
-        if(gapRight<gapLeft){attachedX.direction = "right"; attachedX.diff = 1*gapLeft/size2X;}
+        if(gapRight>gapLeft){attachedX.direction = "left"; attachedX.diff = rac1Right-rac2Left;}
+        if(gapRight<gapLeft){attachedX.direction = "right"; attachedX.diff = rac2Right-rac1Left;}
         if(gapRight==gapLeft){attachedX.direction = "centered";} 
         
         //Y
-        if(gapTop>gapBottom){attachedY.direction = "bottom"; attachedY.diff = 1*gapTop/size2Y;}
-        if(gapTop<gapBottom){attachedY.direction = "top"; attachedY.diff = 1*gapBottom/size2Y;}
+        if(gapTop>gapBottom){attachedY.direction = "bottom"; attachedY.diff = rac2Bottom-rac1Top;}
+        if(gapTop<gapBottom){attachedY.direction = "top"; attachedY.diff = rac1Bottom - rac2Top;}
         if(gapTop==gapBottom){attachedY.direction = "centered"; attachedY.diff = 0.1;} 
 
-
         //final direction choosing
-        if(attachedX.diff>attachedY.diff){
+        if(attachedX.diff<attachedY.diff){
             ar.direction = attachedX.direction;
         }
-        else if(attachedX.diff<attachedY.diff){
+        else if(attachedX.diff>attachedY.diff){
             ar.direction = attachedY.direction;
         }
         else{
             console.log("How did we get here?");
         }
+        console.log(attachedX.diff, attachedX.direction)
+        console.log("");
+        console.log(attachedY.diff, attachedY.direction)
+        console.log("");
+        console.log(ar.direction)
 
     }   
 
