@@ -102,13 +102,13 @@ class Player{
         
     }
     update(){
+        console.log(this.onGround)
         //if player is on the ground than move slowness is the ground one
         if(this.clip==true){
             //GRAVITY AND VELOCITY CHANGERS
-            this.velocity.y += this.gravityForce;
             if(this.onGround == true){
                 //for left (velocity on -)
-                
+
                 if(this.velocity.x>0){
                     this.velocity.x -= this.moveSlowness;
                 }
@@ -119,7 +119,7 @@ class Player{
             }
             //if player isn't on the ground than move slowness is the air one
             if(this.onGround == false){
-    
+                this.velocity.y += this.gravityForce;
                 //for left (velocity on -)
                 if(this.velocity.x>0){
                     this.velocity.x -= this.airmoveSlowness;
@@ -132,8 +132,7 @@ class Player{
         }
 
         //COLLISION
-        var collider;
-        //collision loop
+        var collider
         var i = 0
         while(i<platforms.length){
             var plat = platforms[i];
@@ -192,15 +191,15 @@ class Player{
 
         //BOTTOM
         //if bottom is touching the ground
-        if(this.sides.bottom > htmlCanvas.height){
+        if((this.sides.bottom > htmlCanvas.height)){
             this.velocity.y = 0;
             //there might be a situation when player's part is "underground"
             this.pos.y = htmlCanvas.height - this.size.h;
             this.onGround = true;
         }
-        //if bottom isn't touching ground
-        if(this.sides.bottom < htmlCanvas.height){
-            //this.onGround = false;
+        //if colider is not active
+        if((this.sides.bottom < htmlCanvas.height)&&!collider){
+            this.onGround = false;
         }
 
         //SIDES switching
@@ -419,11 +418,6 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
         else{
             console.log("How did we get here?");
         }
-        console.log(attachedX.diff, attachedX.direction)
-        console.log("");
-        console.log(attachedY.diff, attachedY.direction)
-        console.log("");
-        console.log(ar.direction)
 
     }   
 
