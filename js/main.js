@@ -14,26 +14,14 @@ var htmlCanvas = document.getElementById('c'),
         d:68
     },
     pressedKeys = {},
-    platforms = [];
+    platforms = [],
+    platforms_counter;
 
 
 randint = function(min, max){return Math.random() * (max - min) + min;};
 htmlCanvas.width = 1280;
 htmlCanvas.height = 720;
 
-
-//!!!!
-//!!!!
-//!!!!
-//!!!!
-//!!!!
-//!!!!
-//FOR LATER make player act if touching with platforms
-//!!!!
-//!!!!
-//!!!!
-//!!!!
-//!!!!
 
 //CLASS
 class Player{
@@ -102,7 +90,6 @@ class Player{
         
     }
     update(){
-        console.log(this.onGround)
         //if player is on the ground than move slowness is the ground one
         if(this.clip==true){
             //GRAVITY AND VELOCITY CHANGERS
@@ -133,6 +120,7 @@ class Player{
 
         //COLLISION
         var collider
+        //platform collision
         var i = 0
         while(i<platforms.length){
             var plat = platforms[i];
@@ -156,15 +144,15 @@ class Player{
                     this.onGround = true;
                 }
                 else if(collider.direction=="bottom"){
-                    this.velocity.y = 1;
+                    this.velocity.y = 0.5;
                     this.pos.y = collider.bottom+1;
                 }
                 else if(collider.direction=="left"){
-                    this.pos.x -= 0.1;
+                    this.pos.x = collider.left - this.size.w;
                     this.velocity.x = 0;
                 }
                 else if(collider.direction=="right"){
-                    this.pos.x += 0.1;
+                    this.pos.x = collider.right;
                     this.velocity.x = 0;
                 }
                 else{
@@ -175,6 +163,8 @@ class Player{
             
             i = i + 1;
         }
+        //obstacle collision
+        var i = 0
 
 
         //move player with its acceleration
@@ -359,6 +349,7 @@ class Platform{
             if(this.childcreated==false){
                 platforms.push(new Platform()); 
                 this.childcreated = true;
+                platforms_counter += 1;
             }
         }
         if(this.pos.y>htmlCanvas.height+10){
