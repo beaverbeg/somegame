@@ -21,7 +21,9 @@ pressedKeys = {},
 platforms = [],
 platforms_counter;
 
-
+//MAKE OBSTABLES IN PLATFORM CLASS 
+//OR 
+//MAKE ANOTHER OBSTABLE CLASS AND ATACH IT TO PLATFORMS WITH VARIABLES
 
 //CLASS
 class Player{
