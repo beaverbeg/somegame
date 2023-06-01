@@ -1,26 +1,26 @@
 //VARIABLES
 var htmlCanvas = document.getElementById('c'),
-    ctx = htmlCanvas.getContext('2d'),
-    raito_height = 1080,
-    ratio_width = 1980,
+ctx = htmlCanvas.getContext('2d'),
+raito_height = 1080,
+ratio_width = 1980,
     
-    scaledWidth = window.innerWidth/ratio_width,
-    scaledHeight = window.innerHeight/raito_height,
-    f = (scaledHeight+scaledWidth)/2,
-    codes = {
-        w:87,
-        s:83,
-        a:65,
-        d:68
-    },
-    pressedKeys = {},
-    platforms = [],
-    platforms_counter;
-
-
+scaledWidth = window.innerWidth/ratio_width,
+scaledHeight = window.innerHeight/raito_height,
+f = (scaledHeight+scaledWidth)/2;
 randint = function(min, max){return Math.random() * (max - min) + min;};
 htmlCanvas.width = 1280;
 htmlCanvas.height = 720;
+
+var codes = {
+    w:87,
+    s:83,
+    a:65,
+    d:68
+},
+pressedKeys = {},
+platforms = [],
+platforms_counter;
+
 
 
 //CLASS
@@ -36,6 +36,7 @@ class Player{
             w: 50,
             h: 50
         }
+        this.score = 0;
         this.color = "blue";
         //activates when player is stepping on first platform
         this.floorislava = false;
@@ -90,6 +91,9 @@ class Player{
         
     }
     update(){
+        //DELETE
+        console.log(this.score);
+
         //if player is on the ground than move slowness is the ground one
         if(this.clip==true){
             //GRAVITY AND VELOCITY CHANGERS
@@ -120,7 +124,7 @@ class Player{
 
         //COLLISION
         var collider
-        //platform collision
+        //platform collision and score counter
         var i = 0
         while(i<platforms.length){
             var plat = platforms[i];
@@ -131,6 +135,7 @@ class Player{
                 plat.sides2.top, plat.sides2.bottom, 
                 plat.sides2.left, plat.sides2.right);
 
+            //collision
             if(ar.isColliding==true){  
                 collider = ar;
             }
@@ -144,6 +149,9 @@ class Player{
                     this.onGround = true;
                 }
                 else if(collider.direction=="bottom"){
+                    if(this.pos.y+this.size.h>=htmlCanvas.width || this.onGround==true){
+                        lose(this);
+                    }
                     this.velocity.y = 0.5;
                     this.pos.y = collider.bottom+1;
                 }
@@ -160,11 +168,17 @@ class Player{
                 }
 
             }
+
+            //SCORE
+            if(plat){
+                if(this.pos.y+this.size.h<plat.pos.y && plat.scoreHolding==true){
+                    plat.scoreHolding = false;
+                    this.score += 1;
+                }
+            }
             
             i = i + 1;
         }
-        //obstacle collision
-        var i = 0
 
 
         //move player with its acceleration
@@ -286,6 +300,7 @@ class Platform{
         this.childcreated = false;
         this.gapSize = 250;
         this.gapPos = randint(10, htmlCanvas.width-10);
+        this.scoreHolding = true;
         this.velocity = {
             x: 0,
             y: 0.5
@@ -453,6 +468,12 @@ loop = function(){
         update();
         loop();
     },5)
+}
+
+//Lose function
+//activates when player should die
+function lose(player){
+    console.log("lose")
 }
 
 
