@@ -297,6 +297,7 @@ class Player{
 }
 class Platform{
     constructor(){
+        //platforms
         this.color = "black";
         this.nextPlatformGap = 200;
         this.childcreated = false;
@@ -335,6 +336,24 @@ class Platform{
             left: this.pos2.x,
             right: this.pos2.x + this.size2.w
         }
+
+        //Obstacles
+        this.ObstacleSpike = false; // simple spike(s) on the platform to kill player 
+        this.ObstacleWall = false; // two walls that block a way to "mirror"
+
+        //hitbox (for collision function) should be a ractangle??
+        //pozycja to wierzchołek pomiędzy ramionami
+        this.ObstacleSpike_size = {        
+            h: 0,
+            w: 0
+        }
+
+        this.ObstacleSpike_pos = {
+            x: 0,
+            y: 0
+        }
+        this.ObstacleSpike_color = "red";
+        
     }
     draw(){
         ctx.fillStyle = this.color;
@@ -476,6 +495,15 @@ loop = function(){
 //activates when player should die
 function lose(player){
     console.log("lose")
+}
+
+//Triangle function for obstacles
+function drawTriangle(posX, posY, sizeH, sizeW) {
+    ctx.beginPath();
+    ctx.moveTo(posX, posY);
+    ctx.lineTo(posX-sizeW/2, posY+sizeH);
+    ctx.lineTo(posX+sizeW/2, posY+sizeH);
+    ctx.fill();
 }
 
 
