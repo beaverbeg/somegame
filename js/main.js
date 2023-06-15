@@ -7,7 +7,7 @@ ratio_width = 1980,
 scaledWidth = window.innerWidth/ratio_width,
 scaledHeight = window.innerHeight/raito_height,
 f = (scaledHeight+scaledWidth)/2;
-randint = function(min, max){return Math.random() * (max - min) + min;};
+randint = function(min, max){return Math.ceil(Math.random() * (max - min) + min);};
 htmlCanvas.width = 1280;
 htmlCanvas.height = 720;
 
@@ -93,8 +93,6 @@ class Player{
         
     }
     update(){
-        //DELETE
-        console.log(this.score);
 
         //if player is on the ground than move slowness is the ground one
         if(this.clip==true){
@@ -338,27 +336,46 @@ class Platform{
         }
 
         //Obstacles
-        this.ObstacleSpike = false; // simple spike(s) on the platform to kill player 
+        this.ObstacleSpikes = true; // spike chain on platform 
+        this.ObstacleSpikeStreak = randint(0,4); //number of spikes in the chain
+        console.log(this.ObstacleSpikeStreak);
         this.ObstacleWall = false; // two walls that block a way to "mirror"
+        if(randint(1,1500)<500){
+            this.ObstacleWall = true;
+        }
+
+        this.ObstacleWall_size = {
+            h: 0,
+            w: 0
+        }
+        this.ObstacleWall_pos = {
+            x: 0,
+            y: 0
+        }
 
         //hitbox (for collision function) should be a ractangle??
         //pozycja to wierzchołek pomiędzy ramionami
-        this.ObstacleSpike_size = {        
+        this.ObstacleSpikes_size = {        
             h: 0,
             w: 0
         }
 
-        this.ObstacleSpike_pos = {
+        this.ObstacleSpikes_pos = {
             x: 0,
             y: 0
         }
-        this.ObstacleSpike_color = "red";
+        this.ObstacleSpikes_color = "red";
         
     }
     draw(){
+        //platforms 
         ctx.fillStyle = this.color;
         ctx.fillRect(this.pos.x, this.pos.y, this.size.w, this.size.h);
         ctx.fillRect(this.pos2.x, this.pos2.y,this.size2.w,this.size2.h);
+
+        //obstacles
+        ctx.fillStyle = this.ObstacleSpikes_color;
+
     }
     update(){
         //updating sides
@@ -375,11 +392,14 @@ class Platform{
             right: this.pos2.x + this.size2.w
         }
 
-
+        //platforms positions
         this.pos.y += this.velocity.y;
         this.pos.x += this.velocity.x;
         this.pos2.y += this.velocity.y;
         this.pos2.x += this.velocity.x;
+
+        //obstacles positions
+        
 
         if(this.pos.y>=this.nextPlatformGap){
             if(this.childcreated==false){
