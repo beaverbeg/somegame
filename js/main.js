@@ -142,30 +142,32 @@ class Player{
             if(ar2.isColliding==true){  
                 collider = ar2;
             }
-            //TO FIX: left and right collisions
+            //MAKE MULTIPLE COLLIDERS (FOR OBSTACLES)
             if(collider){
                 if(collider.direction=="top"){
                     this.pos.y = collider.top-this.size.h;
                     this.onGround = true;
+                    break;
                 }
-                else if(collider.direction=="bottom"){
+                if(collider.direction=="bottom"){
                     if(this.pos.y+this.size.h>=htmlCanvas.width || this.onGround==true){
                         lose(this);
                     }
                     this.velocity.y = 0.5;
                     this.pos.y = collider.bottom+1;
+                    break;
                 }
-                else if(collider.direction=="left"){
+                if(collider.direction=="left"){
                     this.pos.x = collider.left - this.size.w;
                     this.velocity.x = 0;
+                    break;
                 }
-                else if(collider.direction=="right"){
+                if(collider.direction=="right"){
                     this.pos.x = collider.right;
                     this.velocity.x = 0;
+                    break;
                 }
-                else{
-                    this.onGround = false;
-                }
+                this.onGround = false;
 
             }
 
@@ -336,23 +338,39 @@ class Platform{
         }
 
         //Obstacles
-        this.ObstacleSpikes = true; // spike chain on platform 
-        this.ObstacleSpikeStreak = randint(0,4); //number of spikes in the chain
-        console.log(this.ObstacleSpikeStreak);
         this.ObstacleWall = false; // two walls that block a way to "mirror"
         if(randint(1,1500)<500){
             this.ObstacleWall = true;
+            console.log("mega")
         }
-
         this.ObstacleWall_size = {
-            h: 0,
-            w: 0
+            h: this.nextPlatformGap+this.size.h,
+            w: 10
+        }
+        this.ObstacleWall_size2 = {
+            h: this.nextPlatformGap+this.size.h,
+            w: 10
         }
         this.ObstacleWall_pos = {
             x: 0,
-            y: 0
+            y: this.pos.y-this.ObstacleWall_size.h
         }
+        this.ObstacleWall_pos2 = {
+            x: htmlCanvas.width-this.ObstacleWall_size.w,
+            y: this.pos.y-this.ObstacleWall_size.h
+        }
+        this.ObstacleWall_sides = {
 
+        }
+        this.ObstacleWall_sides2 = {
+
+        }
+        this.ObstacleWall_color = "black";
+
+
+
+        this.ObstacleSpikes = true; // spike chain on platform 
+        this.ObstacleSpikeStreak = randint(0,4); //number of spikes in the chain
         //hitbox (for collision function) should be a ractangle??
         //pozycja to wierzchołek pomiędzy ramionami
         this.ObstacleSpikes_size = {        
@@ -374,7 +392,13 @@ class Platform{
         ctx.fillRect(this.pos2.x, this.pos2.y,this.size2.w,this.size2.h);
 
         //obstacles
-        ctx.fillStyle = this.ObstacleSpikes_color;
+        if(this.ObstacleWall==true){
+            ctx.fillStyle = this.ObstacleWall_color;
+            ctx.fillRect(this.ObstacleWall_pos.x, this.ObstacleWall_pos.y,
+            this.ObstacleWall_size.w, this.ObstacleWall_size.h);
+            ctx.fillRect(this.ObstacleWall_pos2.x, this.ObstacleWall_pos2.y,
+            this.ObstacleWall_size2.w, this.ObstacleWall_size2.h);
+        }
 
     }
     update(){
@@ -392,6 +416,7 @@ class Platform{
             right: this.pos2.x + this.size2.w
         }
 
+
         //platforms positions
         this.pos.y += this.velocity.y;
         this.pos.x += this.velocity.x;
@@ -399,7 +424,17 @@ class Platform{
         this.pos2.x += this.velocity.x;
 
         //obstacles positions
-        
+        if(this.ObstacleWall==true){
+            this.ObstacleWall_pos = {
+                x: 0,
+                y: this.pos.y-this.ObstacleWall_size.h
+            }
+            this.ObstacleWall_pos2 = {
+                x: htmlCanvas.width-this.ObstacleWall_size.w,
+                y: this.pos.y-this.ObstacleWall_size.h
+            }
+        }
+
 
         if(this.pos.y>=this.nextPlatformGap){
             if(this.childcreated==false){
@@ -408,7 +443,7 @@ class Platform{
                 platforms_counter += 1;
             }
         }
-        if(this.pos.y>htmlCanvas.height+10){
+        if(this.pos.y>htmlCanvas.height+this.nextPlatformGap){
             platforms.shift();
         }
 
