@@ -123,55 +123,60 @@ class Player{
         }
 
         //COLLISION
-        var collider
+        var collider = [];
         //platform collision and score counter
         var i = 0
         while(i<platforms.length){
             var plat = platforms[i];
-            var ar = colliding(this.sides.top, this.sides.bottom, this.sides.left, this.sides.right,
-                plat.sides.top, plat.sides.bottom, 
-                plat.sides.left, plat.sides.right);
-            var ar2 = colliding(this.sides.top, this.sides.bottom, this.sides.left, this.sides.right,
-                plat.sides2.top, plat.sides2.bottom, 
-                plat.sides2.left, plat.sides2.right);
+            function checkNewCollider(top,bottom,left,right){
+                var col = colliding(player.sides.top,player.sides.bottom, player.sides.left,player.sides.right,
+                    top,bottom,left,right);
+                if(col.isColliding==true){
+                    collider.push(col);
+                }
+            }
 
-            //collision
-            if(ar.isColliding==true){  
-                collider = ar;
-            }
-            if(ar2.isColliding==true){  
-                collider = ar2;
-            }
-            //MAKE MULTIPLE COLLIDERS (FOR OBSTACLES)
+            //NEUTRAL COLLISION
+            //platforms
+            checkNewCollider(plat.sides.top,plat.sides.bottom,plat.sides.left,plat.sides.right);
+            checkNewCollider(plat.sides2.top,plat.sides2.bottom,plat.sides2.left,plat.sides2.right)
+            //wall obstacles
+            checkNewCollider(plat.ObstacleWall_sides.top, plat.ObstacleWall_sides.bottom,
+                plat.ObstacleWall_sides.left, plat.ObstacleWall_sides.right);
+            checkNewCollider(plat.ObstacleWall_sides2.top, plat.ObstacleWall_sides2.bottom,
+                    plat.ObstacleWall_sides2.left, plat.ObstacleWall_sides2.right);
             if(collider){
-                if(collider.direction=="top"){
-                    this.pos.y = collider.top-this.size.h;
-                    this.onGround = true;
-                    break;
-                }
-                if(collider.direction=="bottom"){
-                    if(this.pos.y+this.size.h>=htmlCanvas.width || this.onGround==true){
-                        lose(this);
+                collider.forEach((item)=>{
+                    if(item.direction=="top"){
+                        this.pos.y = item.top-this.size.h;
+                        this.onGround = true;
                     }
-                    this.velocity.y = 0.5;
-                    this.pos.y = collider.bottom+1;
-                    break;
-                }
-                if(collider.direction=="left"){
-                    this.pos.x = collider.left - this.size.w;
-                    this.velocity.x = 0;
-                    break;
-                }
-                if(collider.direction=="right"){
-                    this.pos.x = collider.right;
-                    this.velocity.x = 0;
-                    break;
-                }
-                this.onGround = false;
-
+                    else{
+                        this.onGround = false;
+                    }
+                    if(item.direction=="bottom"){
+                        if(this.pos.y+this.size.h>=htmlCanvas.width || this.onGround==true){
+                            lose(this);
+                        }
+                        this.velocity.y = 0.5;
+                        this.pos.y = item.bottom+1;
+                    }
+                    if(item.direction=="left"){
+                        this.pos.x = item.left - this.size.w;
+                        this.velocity.x = 0;
+                    }
+                    if(item.direction=="right"){
+                        this.pos.x = item.right;
+                        this.velocity.x = 0;
+                    }
+                })
             }
+            //OBSTACLE COLLISION
 
-            //SCORE
+
+
+
+            //SCORE COUNTING
             if(plat){
                 if(this.pos.y+this.size.h<plat.pos.y && plat.scoreHolding==true){
                     plat.scoreHolding = false;
@@ -341,7 +346,6 @@ class Platform{
         this.ObstacleWall = false; // two walls that block a way to "mirror"
         if(randint(1,1500)<500){
             this.ObstacleWall = true;
-            console.log("mega")
         }
         this.ObstacleWall_size = {
             h: this.nextPlatformGap+this.size.h,
@@ -360,27 +364,39 @@ class Platform{
             y: this.pos.y-this.ObstacleWall_size.h
         }
         this.ObstacleWall_sides = {
-
+            bottom: this.ObstacleWall_pos.y + this.ObstacleWall_size.h,
+            top: this.ObstacleWall_pos.y,
+            left: this.ObstacleWall_pos.x,
+            right: this.ObstacleWall_pos.x + this.ObstacleWall_size.w
         }
         this.ObstacleWall_sides2 = {
-
+            bottom: this.ObstacleWall_pos2.y + this.ObstacleWall_size2.h,
+            top: this.ObstacleWall_pos2.y,
+            left: this.ObstacleWall_pos2.x,
+            right: this.ObstacleWall_pos2.x + this.ObstacleWall_size2.w
         }
         this.ObstacleWall_color = "black";
 
 
 
         this.ObstacleSpikes = true; // spike chain on platform 
-        this.ObstacleSpikeStreak = randint(0,4); //number of spikes in the chain
-        //hitbox (for collision function) should be a ractangle??
-        //pozycja to wierzchołek pomiędzy ramionami
+        this.ObstacleSpikesStreak = randint(0,4); //number of spikes in the chain
+        //hitbox isnt fit in a visual spike
+        //so variables in draw function have to be diffrent
         this.ObstacleSpikes_size = {        
-            h: 0,
-            w: 0
+            h: 20,
+            w: 60*this.ObstacleSpikesStreak
         }
 
         this.ObstacleSpikes_pos = {
-            x: 0,
-            y: 0
+            x: undefined,
+            y: this.ObstacleSpikes_size.h + this.pos.y
+        }
+        this.ObstacleSpikes_sides = {
+            bottom: this.ObstacleSpikes_pos.y + this.ObstacleSpikes_size.h,
+            top: this.ObstacleSpikes_pos.y,
+            left: this.ObstacleSpikes_pos.x,
+            right: this.ObstacleSpikes_pos.x + this.ObstacleSpikes_size.w
         }
         this.ObstacleSpikes_color = "red";
         
@@ -399,6 +415,9 @@ class Platform{
             ctx.fillRect(this.ObstacleWall_pos2.x, this.ObstacleWall_pos2.y,
             this.ObstacleWall_size2.w, this.ObstacleWall_size2.h);
         }
+        if(this.ObstacleSpikes = true){
+
+        }
 
     }
     update(){
@@ -414,6 +433,18 @@ class Platform{
             top: this.pos2.y,
             left: this.pos2.x,
             right: this.pos2.x + this.size2.w
+        }
+        this.ObstacleWall_sides = {
+            bottom: this.ObstacleWall_pos.y + this.ObstacleWall_size.h,
+            top: this.ObstacleWall_pos.y,
+            left: this.ObstacleWall_pos.x,
+            right: this.ObstacleWall_pos.x + this.ObstacleWall_size.w
+        }
+        this.ObstacleWall_sides2 = {
+            bottom: this.ObstacleWall_pos2.y + this.ObstacleWall_size2.h,
+            top: this.ObstacleWall_pos2.y,
+            left: this.ObstacleWall_pos2.x,
+            right: this.ObstacleWall_pos2.x + this.ObstacleWall_size2.w
         }
 
 
