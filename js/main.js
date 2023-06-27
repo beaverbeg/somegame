@@ -26,8 +26,115 @@ platforms_counter;
 //MAKE ANOTHER OBSTABLE CLASS AND ATACH IT TO PLATFORMS WITH VARIABLES
 
 //CLASS
+class Game{
+    constructor(){
+        this.running = true;
+        this.platforms = [];
+        this.player;
+        this.platforms_counter;
+        this.gameSpeed = 1;
+        
+    }
+    update(){
+        this.player.update();
+
+        var i = 0
+        while(i<this.platforms.length){
+            this.platforms[i].update()
+            i++;
+        }
+    }
+    redraw(){
+        ctx.clearRect(0, 0, htmlCanvas.width, htmlCanvas.height);
+        ctx.beginPath();
+
+        this.player.draw();
+
+        var i = 0
+        while(i<this.platforms.length){
+            this.platforms[i].draw()
+            i++;
+        }
+    
+        ctx.stroke();
+    }
+    stop(){
+        this.running = false;
+    }
+    lose(){
+        console.log("lose");
+        this.stop();
+    }
+    loop(){
+        //i have no idea with "this" losses sense but the .bind needs to be there
+        setTimeout(function() {  
+            this.update()
+            this.redraw();                   
+            if (this.running==true) {
+                this.loop();           
+            }                     
+        }.bind(this),5)
+    }
+    run(){
+        this.platforms.push(new Platform());
+        this.player = new Player()
+
+        this.loop();
+    }
+    colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom, rac2Left, rac2Right){
+        var ar = {
+            isColliding: false,
+            direction: "none",
+            top: rac2Top,
+            bottom: rac2Bottom,
+            left: rac2Left,
+            right: rac2Right
+        };
+        var sizeX = rac1Right - rac1Left;
+        var sizeY = rac1Bottom - rac1Top;
+        var size2X = rac2Right - rac2Left;
+        var size2Y = rac2Bottom - rac2Top;
+        if(rac1Bottom>rac2Top && rac1Top<rac2Bottom && rac1Left<rac2Right && rac1Right>rac2Left){
+            ar.isColliding = true;
+            var gapLeft, gapRight, gapTop, gapBottom;
+            var attachedX = {direction:"none", diff: 0};
+            var attachedY = {direction:"none", diff: 0};
+            //check which direction is closer to be out of ractangle 2 and set the direction
+        
+            gapLeft = rac1Left - rac2Left;
+            gapRight = rac2Right - rac1Right;
+            gapTop = rac1Top - rac2Top;
+            gapBottom = rac2Bottom - rac1Bottom;
+
+            //X
+            if(gapRight>gapLeft){attachedX.direction = "left"; attachedX.diff = rac1Right-rac2Left;}
+            if(gapRight<gapLeft){attachedX.direction = "right"; attachedX.diff = rac2Right-rac1Left;}
+            if(gapRight==gapLeft){attachedX.direction = "centered";} 
+        
+            //Y
+            if(gapTop>gapBottom){attachedY.direction = "bottom"; attachedY.diff = rac2Bottom-rac1Top;}
+            if(gapTop<gapBottom){attachedY.direction = "top"; attachedY.diff = rac1Bottom - rac2Top;}
+            if(gapTop==gapBottom){attachedY.direction = "centered"; attachedY.diff = 0.1;} 
+
+            //final direction choosing
+            if(attachedX.diff<attachedY.diff){
+                ar.direction = attachedX.direction;
+            }
+            else if(attachedX.diff>attachedY.diff){
+                ar.direction = attachedY.direction;
+            }
+            else{
+                console.log("How did we get here?");
+            }
+
+        }   
+
+        return ar;
+    }
+}
 class Player{
     constructor(){
+        this.showPos = true;
         this.moveable = true;
         this.clip = true;
         this.pos = {
@@ -93,6 +200,11 @@ class Player{
         
     }
     update(){
+        //pos (not working)
+        if(this.showPos==true){
+            ctx.font = "5px Arial"
+            ctx.fillText("x:"+this.pos.x + " y:" + this.pos.y, 10, 10)
+        }
 
         //if player is on the ground than move slowness is the ground one
         if(this.clip==true){
@@ -126,10 +238,10 @@ class Player{
         var collider = [];
         //platform collision and score counter
         var i = 0
-        while(i<platforms.length){
-            var plat = platforms[i];
+        while(i<game.platforms.length){
+            var plat = game.platforms[i];
             function checkNewCollider(top,bottom,left,right){
-                var col = colliding(player.sides.top,player.sides.bottom, player.sides.left,player.sides.right,
+                var col = game.colliding(game.player.sides.top,game.player.sides.bottom, game.player.sides.left,game.player.sides.right,
                     top,bottom,left,right);
                 if(col.isColliding==true){
                     collider.push(col);
@@ -156,7 +268,7 @@ class Player{
                     }
                     if(item.direction=="bottom"){
                         if(this.pos.y+this.size.h>=htmlCanvas.width || this.onGround==true){
-                            lose(this);
+                            game.lose(this);
                         }
                         this.velocity.y = 0.5;
                         this.pos.y = item.bottom+1;
@@ -307,6 +419,7 @@ class Platform{
         this.nextPlatformGap = 200;
         this.childcreated = false;
         this.gapSize = 250;
+        //gap position is center of the gap
         this.gapPos = randint(10, htmlCanvas.width-10);
         this.scoreHolding = true;
         this.velocity = {
@@ -387,6 +500,18 @@ class Platform{
             h: 20,
             w: 60*this.ObstacleSpikesStreak
         }
+        //to be fixed (choose on what platform the spikes can spawn)
+        if(htmlCanvas.width-this.gapPos+this.gapSize/2>this.ObstacleSpikes_size.w+100){
+            this.ObstacleSpikesPlatform = 2;
+        }
+        else if(this.gapPos-this.gapSize/2>this.ObstacleSpikes_size.w+100){
+            this.ObstacleSpikesPlatform = 1;
+        }
+        else{
+            this.ObstacleSpikes = false;
+        }
+        console.log(this.ObstacleSpikesPlatform)
+        //
 
         this.ObstacleSpikes_pos = {
             x: undefined,
@@ -469,24 +594,24 @@ class Platform{
 
         if(this.pos.y>=this.nextPlatformGap){
             if(this.childcreated==false){
-                platforms.push(new Platform()); 
+                game.platforms.push(new Platform()); 
                 this.childcreated = true;
-                platforms_counter += 1;
+                game.platforms_counter += 1;
             }
         }
         if(this.pos.y>htmlCanvas.height+this.nextPlatformGap){
-            platforms.shift();
+            game.platforms.shift();
         }
 
     }
 }
 //calling classes
-platforms.push(new Platform()); 
-const player = new Player();
+//platforms.push(new Platform()); 
+//const player = new Player();
 
 //COLLISION
     //direction of colliding is assigned to ractange 1
-function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom, rac2Left, rac2Right){
+/*function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom, rac2Left, rac2Right){
     var ar = {
         isColliding: false,
         direction: "none",
@@ -535,35 +660,33 @@ function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom
     }   
 
     return ar;
-}
+}*/
 
 //GAME FUNCTIONS
+/*
 function update(){
-    
+
+    player.update();
+
     var i = 0
     while(i<platforms.length){
         platforms[i].update()
         i++;
     }
 
-    player.update();
-
-    redraw();
 }
 function redraw() {
     ctx.clearRect(0, 0, htmlCanvas.width, htmlCanvas.height);
     ctx.beginPath();
 
+    player.draw();
 
     var i = 0
     while(i<platforms.length){
         platforms[i].draw()
         i++;
     }
-
-    player.draw();
     
-
     ctx.stroke();
 }
 
@@ -573,9 +696,11 @@ function redraw() {
 loop = function(){
     setTimeout(()=>{
         update();
+        redraw();
         loop();
     },5)
 }
+*/
 
 //Lose function
 //activates when player should die
@@ -609,4 +734,6 @@ window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
 window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
 
 
-loop();
+//loop();
+game = new Game();
+game.run();
