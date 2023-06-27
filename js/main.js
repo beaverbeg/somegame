@@ -58,6 +58,8 @@ class Game{
         ctx.stroke();
     }
     stop(){
+        //when game is stopped all classes and variables are still the same
+        //so if the new game will start they need to be reseted
         this.running = false;
     }
     lose(reason){
