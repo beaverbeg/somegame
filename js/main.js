@@ -1,4 +1,5 @@
 //VARIABLES
+//I NEED TO MAKE EVERY VELOCITY AND ALL THIS SHIT IN CLASSES MULTILLY BY GAME SPEED SO IT CHANGES BY TIME :D
 var htmlCanvas = document.getElementById('c'),
 ctx = htmlCanvas.getContext('2d'),
 raito_height = 1080,
