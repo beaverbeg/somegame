@@ -32,8 +32,7 @@ class Game{
         this.platforms = [];
         this.player;
         this.platforms_counter;
-        this.gameSpeed = 1;
-        
+        this.gameSpeed = 1;  
     }
     update(){
         this.player.update();
@@ -61,8 +60,8 @@ class Game{
     stop(){
         this.running = false;
     }
-    lose(){
-        console.log("lose");
+    lose(reason){
+        console.log("lose: "+reason);
         this.stop();
     }
     loop(){
@@ -149,7 +148,7 @@ class Player{
         this.color = "blue";
         //activates when player is stepping on first platform
         this.floorislava = false;
-        this.onGround = true;
+        this.onGround = false;
         //force of gravity working for player
         this.gravityForce = 0.03;
         //horizontall move slowness when touching the ground IF GREATER THEN STRONGS THEN PLAYER IS SLOWER
@@ -267,8 +266,8 @@ class Player{
                         this.onGround = false;
                     }
                     if(item.direction=="bottom"){
-                        if(this.pos.y+this.size.h>=htmlCanvas.width || this.onGround==true){
-                            game.lose(this);
+                        if(this.sides.bottom>=htmlCanvas.height || this.onGround==true){
+                            game.lose("The player got crashed");
                         }
                         this.velocity.y = 0.5;
                         this.pos.y = item.bottom+1;
@@ -416,7 +415,7 @@ class Platform{
     constructor(){
         //platforms
         this.color = "black";
-        this.nextPlatformGap = 200;
+        this.nextPlatformGap = 170;
         this.childcreated = false;
         this.gapSize = 250;
         //gap position is center of the gap
