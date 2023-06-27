@@ -1,5 +1,4 @@
 //VARIABLES
-//I NEED TO MAKE EVERY VELOCITY AND ALL THIS SHIT IN CLASSES MULTILLY BY GAME SPEED SO IT CHANGES BY TIME :D
 var htmlCanvas = document.getElementById('c'),
 ctx = htmlCanvas.getContext('2d'),
 raito_height = 1080,
@@ -22,10 +21,6 @@ pressedKeys = {},
 platforms = [],
 platforms_counter;
 
-//MAKE OBSTABLES IN PLATFORM CLASS 
-//OR 
-//MAKE ANOTHER OBSTABLE CLASS AND ATACH IT TO PLATFORMS WITH VARIABLES
-
 //CLASS
 class Game{
     constructor(){
@@ -33,9 +28,15 @@ class Game{
         this.platforms = [];
         this.player;
         this.platforms_counter;
-        this.gameSpeed = 1;  
+        //how fast will platforms move (2 = x2, 5 = x5 faster)
+        this.speed = 1; 
+        this.maxspeed = 2.5;
     }
     update(){
+        if(this.speed<this.maxspeed){
+            this.speed += 0.00004;
+        }
+        console.log(this.speed)
         this.player.update();
 
         var i = 0
@@ -209,7 +210,6 @@ class Player{
         }
 
         //if player is on the ground than move slowness is the ground one
-        if(this.clip==true){
             //GRAVITY AND VELOCITY CHANGERS
             if(this.onGround == true){
                 //for left (velocity on -)
@@ -234,13 +234,13 @@ class Player{
                     this.velocity.x += this.airmoveSlowness;
                 }
             }
-        }
 
         //COLLISION
         var collider = [];
         //platform collision and score counter
         var i = 0
         while(i<game.platforms.length){
+            if(this.clip==false) return;
             var plat = game.platforms[i];
             function checkNewCollider(top,bottom,left,right){
                 var col = game.colliding(game.player.sides.top,game.player.sides.bottom, game.player.sides.left,game.player.sides.right,
@@ -269,9 +269,11 @@ class Player{
                         this.onGround = false;
                     }
                     if(item.direction=="bottom"){
-                        if(this.sides.bottom>=htmlCanvas.height || this.onGround==true){
+                        //if there is no "-this.size.h/10" you can hold jump and than pass through a platform
+                        if(this.sides.bottom>htmlCanvas.height-this.size.h/10 || this.onGround==true){
                             game.lose("The player got crashed");
                         }
+                        //WHEN THERE IS HIGH GAME SPEED YOU CAN ATACH TO TOP OF PLATFORM (TO BE FIXED)
                         this.velocity.y = 0.5;
                         this.pos.y = item.bottom+1;
                     }
@@ -503,10 +505,10 @@ class Platform{
             w: 60*this.ObstacleSpikesStreak
         }
         //to be fixed (choose on what platform the spikes can spawn)
-        if(htmlCanvas.width-this.gapPos+this.gapSize/2>this.ObstacleSpikes_size.w+100){
+        if(this){
             this.ObstacleSpikesPlatform = 2;
         }
-        else if(this.gapPos-this.gapSize/2>this.ObstacleSpikes_size.w+100){
+        else if(this){
             this.ObstacleSpikesPlatform = 1;
         }
         else{
@@ -576,10 +578,10 @@ class Platform{
 
 
         //platforms positions
-        this.pos.y += this.velocity.y;
-        this.pos.x += this.velocity.x;
-        this.pos2.y += this.velocity.y;
-        this.pos2.x += this.velocity.x;
+        this.pos.y += this.velocity.y*game.speed;
+        this.pos.x += this.velocity.x*game.speed;
+        this.pos2.y += this.velocity.y*game.speed;
+        this.pos2.x += this.velocity.x*game.speed;
 
         //obstacles positions
         if(this.ObstacleWall==true){
