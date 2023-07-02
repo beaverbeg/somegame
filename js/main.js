@@ -288,6 +288,16 @@ class Player{
                 })
             }
             //OBSTACLE COLLISION
+            //making new colliders (obstacle)
+            collider = [];
+            checkNewCollider(plat.ObstacleSpikes_sides.top, plat.ObstacleSpikes_sides.bottom,
+                plat.ObstacleSpikes_sides.left, plat.ObstacleSpikes_sides.right)
+
+            if(collider){
+                collider.forEach((item)=>{
+                    
+                })
+            }
 
 
 
@@ -319,6 +329,11 @@ class Player{
         //BOTTOM
         //if bottom is touching the ground
         if((this.sides.bottom > htmlCanvas.height)){
+            //change later (spagheti)
+            if(this.score>0){
+                game.lose("Player fell into the lava.");
+            }
+            
             this.velocity.y = 0;
             //there might be a situation when player's part is "underground"
             this.pos.y = htmlCanvas.height - this.size.h;
@@ -531,6 +546,12 @@ class Platform{
         
     }
     draw(){
+        //change this soon (spaghetti)
+        if(game.player.score>0){
+            ctx.fillStyle = "red";
+            ctx.fillRect(0, htmlCanvas.height-5, htmlCanvas.width, 5)
+        }
+
         //platforms 
         ctx.fillStyle = this.color;
         ctx.fillRect(this.pos.x, this.pos.y, this.size.w, this.size.h);
