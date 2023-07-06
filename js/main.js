@@ -31,12 +31,13 @@ class Game{
         //how fast will platforms move (2 = x2, 5 = x5 faster)
         this.speed = 1; 
         this.maxspeed = 2.5;
+        this.lava = false;
+        this.backgroundColor = "#D9D9D9"
     }
     update(){
         if(this.speed<this.maxspeed){
             this.speed += 0.00004;
         }
-        console.log(this.speed)
         this.player.update();
 
         var i = 0
@@ -48,6 +49,10 @@ class Game{
     redraw(){
         ctx.clearRect(0, 0, htmlCanvas.width, htmlCanvas.height);
         ctx.beginPath();
+        
+        //background
+        ctx.fillStyle = this.backgroundColor;
+        ctx.fillRect(0, 0, htmlCanvas.width, htmlCanvas.height);
 
         this.player.draw();
 
@@ -55,6 +60,10 @@ class Game{
         while(i<this.platforms.length){
             this.platforms[i].draw()
             i++;
+        }
+        if(this.lava==true){
+            ctx.fillStyle = "red";
+            ctx.fillRect(0, htmlCanvas.height-5, htmlCanvas.width, 5)
         }
     
         ctx.stroke();
@@ -307,6 +316,7 @@ class Player{
                 if(this.pos.y+this.size.h<plat.pos.y && plat.scoreHolding==true){
                     plat.scoreHolding = false;
                     this.score += 1;
+                    game.lava = true;
                 }
             }
             
@@ -330,7 +340,7 @@ class Player{
         //if bottom is touching the ground
         if((this.sides.bottom > htmlCanvas.height)){
             //change later (spagheti)
-            if(this.score>0){
+            if(game.lava==true){
                 game.lose("Player fell into the lava.");
             }
             
@@ -546,12 +556,6 @@ class Platform{
         
     }
     draw(){
-        //change this soon (spaghetti)
-        if(game.player.score>0){
-            ctx.fillStyle = "red";
-            ctx.fillRect(0, htmlCanvas.height-5, htmlCanvas.width, 5)
-        }
-
         //platforms 
         ctx.fillStyle = this.color;
         ctx.fillRect(this.pos.x, this.pos.y, this.size.w, this.size.h);
@@ -630,109 +634,6 @@ class Platform{
 
     }
 }
-//calling classes
-//platforms.push(new Platform()); 
-//const player = new Player();
-
-//COLLISION
-    //direction of colliding is assigned to ractange 1
-/*function colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom, rac2Left, rac2Right){
-    var ar = {
-        isColliding: false,
-        direction: "none",
-        top: rac2Top,
-        bottom: rac2Bottom,
-        left: rac2Left,
-        right: rac2Right
-    };
-    var sizeX = rac1Right - rac1Left;
-    var sizeY = rac1Bottom - rac1Top;
-    var size2X = rac2Right - rac2Left;
-    var size2Y = rac2Bottom - rac2Top;
-    if(rac1Bottom>rac2Top && rac1Top<rac2Bottom && rac1Left<rac2Right && rac1Right>rac2Left){
-        ar.isColliding = true;
-        var gapLeft, gapRight, gapTop, gapBottom;
-        var attachedX = {direction:"none", diff: 0};
-        var attachedY = {direction:"none", diff: 0};
-        //check which direction is closer to be out of ractangle 2 and set the direction
-        
-        gapLeft = rac1Left - rac2Left;
-        gapRight = rac2Right - rac1Right;
-        gapTop = rac1Top - rac2Top;
-        gapBottom = rac2Bottom - rac1Bottom;
-
-        //X
-        if(gapRight>gapLeft){attachedX.direction = "left"; attachedX.diff = rac1Right-rac2Left;}
-        if(gapRight<gapLeft){attachedX.direction = "right"; attachedX.diff = rac2Right-rac1Left;}
-        if(gapRight==gapLeft){attachedX.direction = "centered";} 
-        
-        //Y
-        if(gapTop>gapBottom){attachedY.direction = "bottom"; attachedY.diff = rac2Bottom-rac1Top;}
-        if(gapTop<gapBottom){attachedY.direction = "top"; attachedY.diff = rac1Bottom - rac2Top;}
-        if(gapTop==gapBottom){attachedY.direction = "centered"; attachedY.diff = 0.1;} 
-
-        //final direction choosing
-        if(attachedX.diff<attachedY.diff){
-            ar.direction = attachedX.direction;
-        }
-        else if(attachedX.diff>attachedY.diff){
-            ar.direction = attachedY.direction;
-        }
-        else{
-            console.log("How did we get here?");
-        }
-
-    }   
-
-    return ar;
-}*/
-
-//GAME FUNCTIONS
-/*
-function update(){
-
-    player.update();
-
-    var i = 0
-    while(i<platforms.length){
-        platforms[i].update()
-        i++;
-    }
-
-}
-function redraw() {
-    ctx.clearRect(0, 0, htmlCanvas.width, htmlCanvas.height);
-    ctx.beginPath();
-
-    player.draw();
-
-    var i = 0
-    while(i<platforms.length){
-        platforms[i].draw()
-        i++;
-    }
-    
-    ctx.stroke();
-}
-
-
-
-//Game loop function
-loop = function(){
-    setTimeout(()=>{
-        update();
-        redraw();
-        loop();
-    },5)
-}
-*/
-
-//Lose function
-//activates when player should die
-function lose(player){
-    console.log("lose")
-}
-
 //Triangle function for obstacles
 function drawTriangle(posX, posY, sizeH, sizeW) {
     ctx.beginPath();
