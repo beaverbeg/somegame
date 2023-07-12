@@ -17,9 +17,7 @@ var codes = {
     a:65,
     d:68
 },
-pressedKeys = {},
-platforms = [],
-platforms_counter;
+pressedKeys = {}
 
 //CLASS
 class Game{
@@ -261,13 +259,13 @@ class Player{
 
             //NEUTRAL COLLISION
             //platforms
-            checkNewCollider(plat.sides.top,plat.sides.bottom,plat.sides.left,plat.sides.right);
-            checkNewCollider(plat.sides2.top,plat.sides2.bottom,plat.sides2.left,plat.sides2.right)
+            checkNewCollider(plat.left.sides.top,plat.left.sides.bottom,plat.left.sides.left,plat.left.sides.right);
+            checkNewCollider(plat.right.sides.top,plat.right.sides.bottom,plat.right.sides.left,plat.right.sides.right)
             //wall obstacles
-            checkNewCollider(plat.ObstacleWall_sides.top, plat.ObstacleWall_sides.bottom,
-                plat.ObstacleWall_sides.left, plat.ObstacleWall_sides.right);
-            checkNewCollider(plat.ObstacleWall_sides2.top, plat.ObstacleWall_sides2.bottom,
-                    plat.ObstacleWall_sides2.left, plat.ObstacleWall_sides2.right);
+            checkNewCollider(plat.obstacle.wall.left.sides.top, plat.obstacle.wall.left.sides.bottom,
+                plat.obstacle.wall.left.sides.left, plat.obstacle.wall.left.sides.right);
+            checkNewCollider(plat.obstacle.wall.right.sides.top, plat.obstacle.wall.right.sides.bottom,
+                    plat.obstacle.wall.right.sides.left, plat.obstacle.wall.right.sides.right);
             if(collider){
                 collider.forEach((item)=>{
                     if(item.direction=="top"){
@@ -298,9 +296,10 @@ class Player{
             }
             //OBSTACLE COLLISION
             //making new colliders (obstacle)
+            //HOW LOSE REASON GONNA WORK HERE MF
             collider = [];
-            checkNewCollider(plat.ObstacleSpikes_sides.top, plat.ObstacleSpikes_sides.bottom,
-                plat.ObstacleSpikes_sides.left, plat.ObstacleSpikes_sides.right)
+            checkNewCollider(plat.obstacle.spike.sides.top, plat.obstacle.spike.sides.bottom,
+                plat.obstacle.spike.sides.left, plat.obstacle.spike.sides.right)
 
             if(collider){
                 collider.forEach((item)=>{
@@ -313,7 +312,7 @@ class Player{
 
             //SCORE COUNTING
             if(plat){
-                if(this.pos.y+this.size.h<plat.pos.y && plat.scoreHolding==true){
+                if(this.pos.y+this.size.h<plat.left.pos.y && plat.right.pos.y && plat.scoreHolding==true){
                     plat.scoreHolding = false;
                     this.score += 1;
                     game.lava = true;
@@ -443,7 +442,8 @@ class Player{
 }
 class Platform{
     constructor(){
-        //platforms
+        //PLATFORMS
+        //global variables for platforms
         this.color = "black";
         this.nextPlatformGap = 170;
         this.childcreated = false;
@@ -455,180 +455,198 @@ class Platform{
             x: 0,
             y: 0.5
         }
-        this.size = {
-            w: htmlCanvas.width,
-            h: 20
+        this.suitable_min = 301 //minimum requiared free space on platform with spikes
+        //seperate variables for platforms
+        //MAN WTF IS THIS
+        this.left = {
+            size:{w:undefined,h:undefined},
+            pos:{x:undefined,y:undefined},
+            sides:{bottom:undefined,top:undefined,left:undefined,right:undefined},
+            size_on_screen:{w:undefined,h:undefined},
+            suitable:undefined
         }
-        this.size2 = {
-            w: htmlCanvas.width,
-            h: 20
+        this.right = {
+            size: {w:undefined,h:undefined},
+            pos: {x:undefined,y:undefined},
+            sides: {bottom:undefined,top:undefined,left:undefined,right:undefined},
+            size_on_screen:{w:undefined,h:undefined},
+            suitable:undefined
         }
-        this.pos = {
-            x: this.gapPos-this.gapSize/2 - this.size.w, 
-            y: -30
-        }
-        this.pos2 = {
-            x: this.gapPos+this.gapSize/2,
-            y: -30
-        }
-        this.sides = {
-            bottom: this.pos.y +this.size.h,
-            top: this.pos.y,
-            left: this.pos.x,
-            right: this.pos.x + this.size.w
-        }
-        this.sides2 = {
-            bottom: this.pos2.y +this.size2.h,
-            top: this.pos2.y,
-            left: this.pos2.x,
-            right: this.pos2.x + this.size2.w
-        }
+        this.left.size.w = htmlCanvas.width;
+        this.left.size.h = 20;
+        this.left.pos.x = this.gapPos-this.gapSize/2 - this.left.size.w;
+        this.left.pos.y = -30;
+        this.left.sides.bottom = this.left.pos.y +this.left.size.h;
+        this.left.sides.top = this.left.pos.y;
+        this.left.sides.left = this.left.pos.x;
+        this.left.sides.right = this.left.pos.x + this.left.size.w;
+        this.left.size_on_screen.w = this.gapPos - this.gapSize/2;
+        this.left.size_on_screen.h = this.left.size.h;
+        this.left.suitable = Boolean;
+
+        this.right.size.w = htmlCanvas.width;
+        this.right.size.h = 20;
+        this.right.pos.x = this.gapPos+this.gapSize/2;
+        this.right.pos.y = -30;
+        this.right.sides.bottom = this.right.pos.y +this.right.size.h;
+        this.right.sides.top = this.right.pos.y;
+        this.right.sides.left = this.right.pos.x;
+        this.right.sides.right = this.right.pos.x + this.right.size.w;
+        this.right.size_on_screen.w = htmlCanvas.width - this.right.pos.x;
+        this.right.size_on_screen.h = this.right.size.h;
+        this.right.suitable = Boolean;
+        
+
 
         //Obstacles
-        this.ObstacleWall = false; // two walls that block a way to "mirror"
+        this.obstacle = {
+            wall:{
+                is:undefined,
+                color:undefined,
+                left:{
+                    size:{h:undefined,w:undefined},
+                    pos:{x:undefined,y:undefined},
+                    sides:{bottom:undefined,top:undefined,left:undefined,right:undefined}
+                },
+                right:{
+                    size:{h:undefined,w:undefined},
+                    pos:{x:undefined,y:undefined},
+                    sides:{bottom:undefined,top:undefined,left:undefined,right:undefined}
+                }
+                
+
+            },  
+            spike:{
+                is:undefined,
+                color:undefined,
+                streak:undefined,
+                size:{h:undefined,w:undefined},
+                pos:{x:undefined,y:undefined},
+                sides:{bottom:undefined,top:undefined,left:undefined,right:undefined}
+            }
+        }
+        this.obstacle.wall.is = false;
+        this.obstacle.wall.color = "black";
+
+        this.obstacle.wall.left.size.h = this.nextPlatformGap+this.left.size.h;
+        this.obstacle.wall.left.size.w = 10;
+        this.obstacle.wall.left.pos.x = 0;
+        this.obstacle.wall.left.pos.y = this.left.pos.y-this.obstacle.wall.left.size.h;
+        this.obstacle.wall.left.sides.bottom = this.obstacle.wall.left.pos.y + this.obstacle.wall.left.size.h;
+        this.obstacle.wall.left.sides.top = this.obstacle.wall.left.pos.y;
+        this.obstacle.wall.left.sides.left = this.obstacle.wall.left.pos.x;
+        this.obstacle.wall.left.sides.right = this.obstacle.wall.left.pos.x + this.obstacle.wall.left.size.w;
+
+        this.obstacle.wall.right.size.h = this.nextPlatformGap+this.left.size.h;
+        this.obstacle.wall.right.size.w = 10;
+        this.obstacle.wall.right.pos.x = htmlCanvas.width-this.obstacle.wall.left.size.w;
+        this.obstacle.wall.right.pos.y = this.left.pos.y-this.obstacle.wall.left.size.h;
+        this.obstacle.wall.right.sides.bottom = this.obstacle.wall.right.pos.y + this.obstacle.wall.right.size.h;
+        this.obstacle.wall.right.sides.top = this.obstacle.wall.right.pos.y;
+        this.obstacle.wall.right.sides.left =  this.obstacle.wall.right.pos.x;
+        this.obstacle.wall.right.sides.right = this.obstacle.wall.right.pos.x + this.obstacle.wall.right.size.w;
+
+
+        this.obstacle.spike.is = true; // spike chain on platform 
+        this.obstacle.spike.color = "red";
+        this.obstacle.spike.streak = randint(0,4); //number of spikes in the chain
+        //hitbox isnt fit in a visual spike
+        //so variables in draw function have to be diffrent
+        this.obstacle.spike.size.h = 20;
+        this.obstacle.spike.size.w = 60*this.obstacle.spike.streak;
+        this.obstacle.spike.pos.x = undefined;
+        this.obstacle.spike.pos.y = this.obstacle.spike.size.h+this.left.pos.y;
+        this.obstacle.spike.bottom = this.obstacle.spike.pos.y + this.obstacle.spike.size.h;
+        this.obstacle.spike.top = this.obstacle.spike.pos.y;
+        this.obstacle.spike.left = this.obstacle.spike.pos.x;
+        this.obstacle.spike.right = this.obstacle.spike.pos.x + this.obstacle.spike.size.w;
+
+
+        //LOGICAL
+        //wall
         if(randint(1,1500)<500){
             this.ObstacleWall = true;
         }
-        this.ObstacleWall_size = {
-            h: this.nextPlatformGap+this.size.h,
-            w: 10
-        }
-        this.ObstacleWall_size2 = {
-            h: this.nextPlatformGap+this.size.h,
-            w: 10
-        }
-        this.ObstacleWall_pos = {
-            x: 0,
-            y: this.pos.y-this.ObstacleWall_size.h
-        }
-        this.ObstacleWall_pos2 = {
-            x: htmlCanvas.width-this.ObstacleWall_size.w,
-            y: this.pos.y-this.ObstacleWall_size.h
-        }
-        this.ObstacleWall_sides = {
-            bottom: this.ObstacleWall_pos.y + this.ObstacleWall_size.h,
-            top: this.ObstacleWall_pos.y,
-            left: this.ObstacleWall_pos.x,
-            right: this.ObstacleWall_pos.x + this.ObstacleWall_size.w
-        }
-        this.ObstacleWall_sides2 = {
-            bottom: this.ObstacleWall_pos2.y + this.ObstacleWall_size2.h,
-            top: this.ObstacleWall_pos2.y,
-            left: this.ObstacleWall_pos2.x,
-            right: this.ObstacleWall_pos2.x + this.ObstacleWall_size2.w
-        }
-        this.ObstacleWall_color = "black";
 
-
-
-        this.ObstacleSpikes = true; // spike chain on platform 
-        this.ObstacleSpikesStreak = randint(0,4); //number of spikes in the chain
-        //hitbox isnt fit in a visual spike
-        //so variables in draw function have to be diffrent
-        this.ObstacleSpikes_size = {        
-            h: 20,
-            w: 60*this.ObstacleSpikesStreak
-        }
-        //to be fixed (choose on what platform the spikes can spawn)
-        if(this){
-            this.ObstacleSpikesPlatform = 2;
-        }
-        else if(this){
-            this.ObstacleSpikesPlatform = 1;
-        }
-        else{
-            this.ObstacleSpikes = false;
-        }
-        console.log(this.ObstacleSpikesPlatform)
-        //
-
-        this.ObstacleSpikes_pos = {
-            x: undefined,
-            y: this.ObstacleSpikes_size.h + this.pos.y
-        }
-        this.ObstacleSpikes_sides = {
-            bottom: this.ObstacleSpikes_pos.y + this.ObstacleSpikes_size.h,
-            top: this.ObstacleSpikes_pos.y,
-            left: this.ObstacleSpikes_pos.x,
-            right: this.ObstacleSpikes_pos.x + this.ObstacleSpikes_size.w
-        }
-        this.ObstacleSpikes_color = "red";
+        //spike
+        if(this.left.size_on_screen.w>this.obstacle.spike.size.w+this.suitable_min){this.left.suitable = true;}
+        else{this.left.suitable = false;}
+        if(this.right.size_on_screen.w>this.obstacle.spike.size.w+this.suitable_min){this.right.suitable = true;}
+        else{this.right.suitable = false;}
         
+        if(this.left.suitable==false && this.right.suitable==false){this.obstacle.spike.is=false;}
+        console.log(this.left.suitable)
+        console.log(this.right.suitable)
+        console.log(this.obstacle.spike.streak)
+        
+
     }
     draw(){
         //platforms 
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.pos.x, this.pos.y, this.size.w, this.size.h);
-        ctx.fillRect(this.pos2.x, this.pos2.y,this.size2.w,this.size2.h);
+        ctx.fillRect(this.left.pos.x, this.left.pos.y, this.left.size.w, this.left.size.h);
+        ctx.fillRect(this.right.pos.x, this.right.pos.y,this.right.size.w,this.right.size.h);
 
         //obstacles
-        if(this.ObstacleWall==true){
-            ctx.fillStyle = this.ObstacleWall_color;
-            ctx.fillRect(this.ObstacleWall_pos.x, this.ObstacleWall_pos.y,
-            this.ObstacleWall_size.w, this.ObstacleWall_size.h);
-            ctx.fillRect(this.ObstacleWall_pos2.x, this.ObstacleWall_pos2.y,
-            this.ObstacleWall_size2.w, this.ObstacleWall_size2.h);
+        if(this.obstacle.wall.is==true){
+            ctx.fillStyle = this.obstacle.wall.color;
+            ctx.fillRect(this.obstacle.wall.left.pos.x, this.obstacle.wall.left.pos.y,
+            this.obstacle.wall.left.size.w, this.obstacle.wall.left.size.h);
+            ctx.fillRect(this.obstacle.wall.right.pos.x, this.obstacle.wall.right.pos.y,
+            this.obstacle.wall.right.size.w, this.obstacle.wall.right.size.h);
         }
-        if(this.ObstacleSpikes = true){
+        if(this.obstacle.spike.is = true){
 
         }
 
     }
     update(){
         //updating sides
-        this.sides = {
-            bottom: this.pos.y +this.size.h,
-            top: this.pos.y,
-            left: this.pos.x,
-            right: this.pos.x + this.size.w
-        }
-        this.sides2 = {
-            bottom: this.pos2.y +this.size2.h,
-            top: this.pos2.y,
-            left: this.pos2.x,
-            right: this.pos2.x + this.size2.w
-        }
-        this.ObstacleWall_sides = {
-            bottom: this.ObstacleWall_pos.y + this.ObstacleWall_size.h,
-            top: this.ObstacleWall_pos.y,
-            left: this.ObstacleWall_pos.x,
-            right: this.ObstacleWall_pos.x + this.ObstacleWall_size.w
-        }
-        this.ObstacleWall_sides2 = {
-            bottom: this.ObstacleWall_pos2.y + this.ObstacleWall_size2.h,
-            top: this.ObstacleWall_pos2.y,
-            left: this.ObstacleWall_pos2.x,
-            right: this.ObstacleWall_pos2.x + this.ObstacleWall_size2.w
-        }
+        this.left.sides.bottom = this.left.pos.y +this.left.size.h;
+        this.left.sides.top = this.left.pos.y;
+        this.left.sides.left = this.left.pos.x;
+        this.left.sides.right = this.left.pos.x + this.left.size.w;
+
+        this.right.sides.bottom = this.right.pos.y +this.right.size.h;
+        this.right.sides.top = this.right.pos.y;
+        this.right.sides.left = this.right.pos.x;
+        this.right.sides.right = this.right.pos.x + this.right.size.w;
+        
+        this.obstacle.wall.left.sides.bottom = this.obstacle.wall.left.pos.y + this.obstacle.wall.left.size.h;
+        this.obstacle.wall.left.sides.top = this.obstacle.wall.left.pos.y;
+        this.obstacle.wall.left.sides.left = this.obstacle.wall.left.pos.x;
+        this.obstacle.wall.left.sides.right = this.obstacle.wall.left.pos.x + this.obstacle.wall.left.size.w;
+
+        this.obstacle.wall.right.sides.bottom = this.obstacle.wall.right.pos.y + this.obstacle.wall.right.size.h;
+        this.obstacle.wall.right.sides.top = this.obstacle.wall.right.pos.y;
+        this.obstacle.wall.right.sides.left =  this.obstacle.wall.right.pos.x;
+        this.obstacle.wall.right.sides.right = this.obstacle.wall.right.pos.x + this.obstacle.wall.right.size.w;
+
 
 
         //platforms positions
-        this.pos.y += this.velocity.y*game.speed;
-        this.pos.x += this.velocity.x*game.speed;
-        this.pos2.y += this.velocity.y*game.speed;
-        this.pos2.x += this.velocity.x*game.speed;
+        this.left.pos.y += this.velocity.y*game.speed;
+        this.left.pos.x += this.velocity.x*game.speed;
+        this.right.pos.y += this.velocity.y*game.speed;
+        this.right.pos.x += this.velocity.x*game.speed;
 
         //obstacles positions
-        if(this.ObstacleWall==true){
-            this.ObstacleWall_pos = {
-                x: 0,
-                y: this.pos.y-this.ObstacleWall_size.h
-            }
-            this.ObstacleWall_pos2 = {
-                x: htmlCanvas.width-this.ObstacleWall_size.w,
-                y: this.pos.y-this.ObstacleWall_size.h
-            }
+        if(this.obstacle.wall.is==true){
+            this.obstacle.wall.left.pos.x = 0;
+            this.obstacle.wall.left.pos.y = this.left.pos.y-this.obstacle.wall.left.size.h; 
+            this.obstacle.wall.right.pos.x = htmlCanvas.width-this.obstacle.wall.left.size.w;
+            this.obstacle.wall.right.pos.y = this.left.pos.y-this.obstacle.wall.left.size.h;
         }
 
 
-        if(this.pos.y>=this.nextPlatformGap){
+        if(this.left.pos.y && this.right.pos.y>=this.nextPlatformGap){
             if(this.childcreated==false){
                 game.platforms.push(new Platform()); 
                 this.childcreated = true;
                 game.platforms_counter += 1;
             }
         }
-        if(this.pos.y>htmlCanvas.height+this.nextPlatformGap){
+        if(this.left.pos.y && this.right.pos.y>htmlCanvas.height+this.nextPlatformGap){
             game.platforms.shift();
         }
 
