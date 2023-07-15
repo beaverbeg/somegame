@@ -340,7 +340,7 @@ class Player{
         if((this.sides.bottom > htmlCanvas.height)){
             //change later (spagheti)
             if(game.lava==true){
-                game.lose("Player fell into the lava.");
+                game.lose("Player burned in lava.");
             }
             
             this.velocity.y = 0;
@@ -555,7 +555,7 @@ class Platform{
         this.obstacle.spike.size.h = 20;
         this.obstacle.spike.size.w = 60*this.obstacle.spike.streak;
         this.obstacle.spike.pos.x = undefined;
-        this.obstacle.spike.pos.y = this.obstacle.spike.size.h+this.left.pos.y;
+        this.obstacle.spike.pos.y = this.left.pos.y-this.obstacle.spike.size.h;
         this.obstacle.spike.bottom = this.obstacle.spike.pos.y + this.obstacle.spike.size.h;
         this.obstacle.spike.top = this.obstacle.spike.pos.y;
         this.obstacle.spike.left = this.obstacle.spike.pos.x;
@@ -565,7 +565,7 @@ class Platform{
         //LOGICAL
         //wall
         if(randint(1,1500)<500){
-            this.ObstacleWall = true;
+            this.obstacle.wall.is = true;
         }
 
         //spike
@@ -573,11 +573,20 @@ class Platform{
         else{this.left.suitable = false;}
         if(this.right.size_on_screen.w>this.obstacle.spike.size.w+this.suitable_min){this.right.suitable = true;}
         else{this.right.suitable = false;}
-        
+        //spike x position
         if(this.left.suitable==false && this.right.suitable==false){this.obstacle.spike.is=false;}
-        console.log(this.left.suitable)
-        console.log(this.right.suitable)
-        console.log(this.obstacle.spike.streak)
+        if(this.obstacle.spike.is){
+            if(this.left.suitable&&this.right.suitable == true){
+                if(randint(1,2)==1){this.right.suitable=false}
+                else{this.left.suitable=false}
+            }
+            if(this.left.suitable){
+                this.obstacle.spike.pos.x = randint(1, this.left.size_on_screen.w - this.suitable_min/2)
+            }   
+            if(this.right.suitable){
+                this.obstacle.spike.pos.x = randint(this.obstacle.spike.pos.x+this.suitable_min_min/2, htmlCanvas.width)
+            }
+        }
         
 
     }
@@ -596,12 +605,48 @@ class Platform{
             this.obstacle.wall.right.size.w, this.obstacle.wall.right.size.h);
         }
         if(this.obstacle.spike.is = true){
-
+            //for(var i=1;i<this.obstacle.spike.streak+1;i++){
+                ctx.fillStyle = this.obstacle.spike.color;
+                ctx.fillRect(this.obstacle.spike.pos.x, this.obstacle.spike.pos.y, this.obstacle.spike.size.w,
+                    this.obstacle.spike.size.h);
+            //}
         }
 
     }
     update(){
-        //updating sides
+        //obstacles
+        if(this.obstacle.wall.is==true){
+            //pos
+            this.obstacle.wall.left.pos.x = 0;
+            this.obstacle.wall.left.pos.y = this.left.pos.y-this.obstacle.wall.left.size.h; 
+            this.obstacle.wall.right.pos.x = htmlCanvas.width-this.obstacle.wall.left.size.w;
+            this.obstacle.wall.right.pos.y = this.left.pos.y-this.obstacle.wall.left.size.h;
+
+            //sides
+            this.obstacle.wall.left.sides.bottom = this.obstacle.wall.left.pos.y + this.obstacle.wall.left.size.h;
+            this.obstacle.wall.left.sides.top = this.obstacle.wall.left.pos.y;
+            this.obstacle.wall.left.sides.left = this.obstacle.wall.left.pos.x;
+            this.obstacle.wall.left.sides.right = this.obstacle.wall.left.pos.x + this.obstacle.wall.left.size.w;
+    
+            this.obstacle.wall.right.sides.bottom = this.obstacle.wall.right.pos.y + this.obstacle.wall.right.size.h;
+            this.obstacle.wall.right.sides.top = this.obstacle.wall.right.pos.y;
+            this.obstacle.wall.right.sides.left =  this.obstacle.wall.right.pos.x;
+            this.obstacle.wall.right.sides.right = this.obstacle.wall.right.pos.x + this.obstacle.wall.right.size.w;
+        }
+        if(this.obstacle.spike.is==true){
+            //pos
+            this.obstacle.spike.pos.y = this.left.pos.y-this.obstacle.spike.size.h;
+
+            //sides
+            this.obstacle.spike.bottom = this.obstacle.spike.pos.y + this.obstacle.spike.size.h;
+            this.obstacle.spike.top = this.obstacle.spike.pos.y;
+            this.obstacle.spike.left = this.obstacle.spike.pos.x;
+            this.obstacle.spike.right = this.obstacle.spike.pos.x + this.obstacle.spike.size.w;
+        }
+
+
+
+        //platform
         this.left.sides.bottom = this.left.pos.y +this.left.size.h;
         this.left.sides.top = this.left.pos.y;
         this.left.sides.left = this.left.pos.x;
@@ -611,33 +656,13 @@ class Platform{
         this.right.sides.top = this.right.pos.y;
         this.right.sides.left = this.right.pos.x;
         this.right.sides.right = this.right.pos.x + this.right.size.w;
-        
-        this.obstacle.wall.left.sides.bottom = this.obstacle.wall.left.pos.y + this.obstacle.wall.left.size.h;
-        this.obstacle.wall.left.sides.top = this.obstacle.wall.left.pos.y;
-        this.obstacle.wall.left.sides.left = this.obstacle.wall.left.pos.x;
-        this.obstacle.wall.left.sides.right = this.obstacle.wall.left.pos.x + this.obstacle.wall.left.size.w;
-
-        this.obstacle.wall.right.sides.bottom = this.obstacle.wall.right.pos.y + this.obstacle.wall.right.size.h;
-        this.obstacle.wall.right.sides.top = this.obstacle.wall.right.pos.y;
-        this.obstacle.wall.right.sides.left =  this.obstacle.wall.right.pos.x;
-        this.obstacle.wall.right.sides.right = this.obstacle.wall.right.pos.x + this.obstacle.wall.right.size.w;
 
 
 
-        //platforms positions
         this.left.pos.y += this.velocity.y*game.speed;
         this.left.pos.x += this.velocity.x*game.speed;
         this.right.pos.y += this.velocity.y*game.speed;
         this.right.pos.x += this.velocity.x*game.speed;
-
-        //obstacles positions
-        if(this.obstacle.wall.is==true){
-            this.obstacle.wall.left.pos.x = 0;
-            this.obstacle.wall.left.pos.y = this.left.pos.y-this.obstacle.wall.left.size.h; 
-            this.obstacle.wall.right.pos.x = htmlCanvas.width-this.obstacle.wall.left.size.w;
-            this.obstacle.wall.right.pos.y = this.left.pos.y-this.obstacle.wall.left.size.h;
-        }
-
 
         if(this.left.pos.y && this.right.pos.y>=this.nextPlatformGap){
             if(this.childcreated==false){
