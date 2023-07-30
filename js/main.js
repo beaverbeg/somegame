@@ -91,14 +91,15 @@ class Game{
 
         this.loop();
     }
-    colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom, rac2Left, rac2Right){
+    colliding(rac1Top, rac1Bottom, rac1Left, rac1Right, rac2Top, rac2Bottom, rac2Left, rac2Right, type){
         var ar = {
             isColliding: false,
             direction: "none",
             top: rac2Top,
             bottom: rac2Bottom,
             left: rac2Left,
-            right: rac2Right
+            right: rac2Right,
+            type: type
         };
         var sizeX = rac1Right - rac1Left;
         var sizeY = rac1Bottom - rac1Top;
@@ -161,11 +162,11 @@ class Player{
         this.floorislava = false;
         this.onGround = false;
         //force of gravity working for player
-        this.gravityForce = 0.03;
+        this.gravityForce = 0.041;
         //horizontall move slowness when touching the ground IF GREATER THEN STRONGS THEN PLAYER IS SLOWER
-        this.moveSlowness = 0.02;
+        this.moveSlowness = 0.018;
         //horizontall move slowness when un the air IF GREATER THEN STRONGER THEN PLAYER IS SLOWER
-        this.airmoveSlowness = 0.023;
+        this.airmoveSlowness = 0.02;
         //if player's part is in the "wall" it will create its "mirror" on other side
         this.mirror = false;
         //mirror position
@@ -192,7 +193,7 @@ class Player{
         //sets the speed for the player
         this.speed = {
             horizontal: 0.04,
-            vertical: 3.5
+            vertical: 4
         }
         //sets the maximum speed for player
         this.maxSpeed = {
@@ -249,9 +250,9 @@ class Player{
         while(i<game.platforms.length){
             if(this.clip==false) return;
             var plat = game.platforms[i];
-            function checkNewCollider(top,bottom,left,right){
+            function checkNewCollider(top,bottom,left,right, type){
                 var col = game.colliding(game.player.sides.top,game.player.sides.bottom, game.player.sides.left,game.player.sides.right,
-                    top,bottom,left,right);
+                    top,bottom,left,right, type);
                 if(col.isColliding==true){
                     collider.push(col);
                 }
@@ -259,14 +260,15 @@ class Player{
 
             //NEUTRAL COLLISION
             //platforms
-            checkNewCollider(plat.left.sides.top,plat.left.sides.bottom,plat.left.sides.left,plat.left.sides.right);
-            checkNewCollider(plat.right.sides.top,plat.right.sides.bottom,plat.right.sides.left,plat.right.sides.right)
+            checkNewCollider(plat.left.sides.top,plat.left.sides.bottom,plat.left.sides.left,plat.left.sides.right, "platform");
+            checkNewCollider(plat.right.sides.top,plat.right.sides.bottom,plat.right.sides.left,plat.right.sides.right, "platform")
             //wall obstacles
             checkNewCollider(plat.obstacle.wall.left.sides.top, plat.obstacle.wall.left.sides.bottom,
-                plat.obstacle.wall.left.sides.left, plat.obstacle.wall.left.sides.right);
+                plat.obstacle.wall.left.sides.left, plat.obstacle.wall.left.sides.right, "wall");
             checkNewCollider(plat.obstacle.wall.right.sides.top, plat.obstacle.wall.right.sides.bottom,
-                    plat.obstacle.wall.right.sides.left, plat.obstacle.wall.right.sides.right);
+                    plat.obstacle.wall.right.sides.left, plat.obstacle.wall.right.sides.right, "wall");
             if(collider){
+                //item is object from checkNewCollider return
                 collider.forEach((item)=>{
                     if(item.direction=="top"){
                         this.pos.y = item.top-this.size.h;
@@ -299,15 +301,16 @@ class Player{
             //HOW LOSE REASON GONNA WORK HERE MF
             collider = [];
             checkNewCollider(plat.obstacle.spike.sides.top, plat.obstacle.spike.sides.bottom,
-                plat.obstacle.spike.sides.left, plat.obstacle.spike.sides.right)
+                plat.obstacle.spike.sides.left, plat.obstacle.spike.sides.right, "spike")
 
             if(collider){
-                collider.forEach((item)=>{
-                    
+                collider.forEach((item)=>{                 
+                    var reason = ".";     
+                    if(item.type == "spike")reason = "Player got cut with spike";
+                    game.lose(reason)
                 })
             }
-
-
+            
 
 
             //SCORE COUNTING
@@ -445,7 +448,7 @@ class Platform{
         //PLATFORMS
         //global variables for platforms
         this.color = "black";
-        this.nextPlatformGap = 170;
+        this.nextPlatformGap = 190;
         this.childcreated = false;
         this.gapSize = 250;
         //gap position is center of the gap
@@ -549,17 +552,17 @@ class Platform{
 
         this.obstacle.spike.is = true; // spike chain on platform 
         this.obstacle.spike.color = "red";
-        this.obstacle.spike.streak = randint(0,4); //number of spikes in the chain
+        this.obstacle.spike.streak = randint(1,4); //number of spikes in the chain
         //hitbox isnt fit in a visual spike
         //so variables in draw function have to be diffrent
-        this.obstacle.spike.size.h = 20;
+        this.obstacle.spike.size.h = 40;
         this.obstacle.spike.size.w = 60*this.obstacle.spike.streak;
         this.obstacle.spike.pos.x = undefined;
         this.obstacle.spike.pos.y = this.left.pos.y-this.obstacle.spike.size.h;
-        this.obstacle.spike.bottom = this.obstacle.spike.pos.y + this.obstacle.spike.size.h;
-        this.obstacle.spike.top = this.obstacle.spike.pos.y;
-        this.obstacle.spike.left = this.obstacle.spike.pos.x;
-        this.obstacle.spike.right = this.obstacle.spike.pos.x + this.obstacle.spike.size.w;
+        this.obstacle.spike.sides.bottom = this.obstacle.spike.pos.y + this.obstacle.spike.size.h;
+        this.obstacle.spike.sides.top = this.obstacle.spike.pos.y;
+        this.obstacle.spike.sides.left = this.obstacle.spike.pos.x;
+        this.obstacle.spike.sides.right = this.obstacle.spike.pos.x + this.obstacle.spike.size.w;
 
 
         //LOGICAL
@@ -581,7 +584,7 @@ class Platform{
                 else{this.left.suitable=false}
             }
             if(this.left.suitable){
-                this.obstacle.spike.pos.x = randint(1, this.left.size_on_screen.w - this.suitable_min/2)
+                this.obstacle.spike.pos.x = randint(1, this.left.size_on_screen.w - this.obstacle.spike.size.w - this.suitable_min/2)
             }   
             if(this.right.suitable){
                 this.obstacle.spike.pos.x = randint(this.obstacle.spike.pos.x+this.suitable_min_min/2, htmlCanvas.width)
@@ -638,10 +641,10 @@ class Platform{
             this.obstacle.spike.pos.y = this.left.pos.y-this.obstacle.spike.size.h;
 
             //sides
-            this.obstacle.spike.bottom = this.obstacle.spike.pos.y + this.obstacle.spike.size.h;
-            this.obstacle.spike.top = this.obstacle.spike.pos.y;
-            this.obstacle.spike.left = this.obstacle.spike.pos.x;
-            this.obstacle.spike.right = this.obstacle.spike.pos.x + this.obstacle.spike.size.w;
+            this.obstacle.spike.sides.bottom = this.obstacle.spike.pos.y + this.obstacle.spike.size.h;
+            this.obstacle.spike.sides.top = this.obstacle.spike.pos.y;
+            this.obstacle.spike.sides.left = this.obstacle.spike.pos.x;
+            this.obstacle.spike.sides.right = this.obstacle.spike.pos.x + this.obstacle.spike.size.w;
         }
 
 
