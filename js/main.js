@@ -298,7 +298,6 @@ class Player{
             }
             //OBSTACLE COLLISION
             //making new colliders (obstacle)
-            //HOW LOSE REASON GONNA WORK HERE MF
             collider = [];
             checkNewCollider(plat.obstacle.spike.sides.top, plat.obstacle.spike.sides.bottom,
                 plat.obstacle.spike.sides.left, plat.obstacle.spike.sides.right, "spike")
