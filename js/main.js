@@ -85,11 +85,16 @@ class Game{
             }
         }
         else{
-            ctx.fillStyle = "brown";
+            ctx.fillStyle = "purple";
             ctx.font = "40px sans-serif"
-            var txt = "ded: "+this.deathReason;
+            var txt = this.deathReason;
             var txt_lenght = ctx.measureText(txt).width;
-            ctx.fillText(txt, (htmlCanvas.width-txt_lenght)/2, 300)
+            ctx.fillText(txt, (htmlCanvas.width/2)-txt_lenght, 300)
+            var txt = "final score:\n"+this.player.score;
+            var txt_lenght = ctx.measureText(txt).width;
+            ctx.font = "35px sans-serif";
+            ctx.fillText(txt, (htmlCanvas.width/2)-txt_lenght, 400)
+            
         }
 
         ctx.stroke();
