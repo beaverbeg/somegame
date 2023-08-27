@@ -22,19 +22,23 @@ pressedKeys = {}
 //CLASS
 class Game{
     constructor(){
+        this.deathReason = "";
+        this.endScreen = false;
         this.running = true;
         this.platforms = [];
         this.player;
+        this.stop = false;
         this.platforms_counter;
         //how fast will platforms move (2 = x2, 5 = x5 faster)
         this.speed = 1; 
-        this.maxspeed = 2.5;
+        this.maxspeed = 1.5;
         this.lava = false;
-        this.backgroundColor = "#D9D9D9"
+        this.backgroundColor = "#D9D9D9";
+        this.text = [];
     }
     update(){
         if(this.speed<this.maxspeed){
-            this.speed += 0.00004;
+            this.speed += 0.00002;
         }
         this.player.update();
 
@@ -43,10 +47,11 @@ class Game{
             this.platforms[i].update()
             i++;
         }
-    }
+    }   
     redraw(){
         ctx.clearRect(0, 0, htmlCanvas.width, htmlCanvas.height);
         ctx.beginPath();
+
         
         //background
         ctx.fillStyle = this.backgroundColor;
@@ -63,17 +68,43 @@ class Game{
             ctx.fillStyle = "red";
             ctx.fillRect(0, htmlCanvas.height-5, htmlCanvas.width, 5)
         }
-    
+
+        //text
+        if(this.endScreen==false){
+            //score
+            ctx.fillStyle = this.player.color;
+            ctx.font = "50px sans-serif";
+            var txt = this.player.score;
+            var txt_lenght = ctx.measureText(txt).width;
+            ctx.fillText(txt, (htmlCanvas.width-txt_lenght)/2, 100);
+            //player pos
+            if(this.player.showPos==true){
+                ctx.fillStyle = this.player.color;
+                ctx.font = "30px sans-serif"
+                ctx.fillText("x:"+this.player.pos.x.toFixed(1) + " y:" + this.player.pos.y.toFixed(1), 10, 50)
+            }
+        }
+        else{
+            ctx.fillStyle = "brown";
+            ctx.font = "40px sans-serif"
+            var txt = "ded: "+this.deathReason;
+            var txt_lenght = ctx.measureText(txt).width;
+            ctx.fillText(txt, (htmlCanvas.width-txt_lenght)/2, 300)
+        }
+
         ctx.stroke();
-    }
-    stop(){
-        //when game is stopped all classes and variables are still the same
-        //so if the new game will start they need to be reseted
-        this.running = false;
+        if(this.clear==true){
+            ctx.clearRect(0, 0, htmlCanvas.width, htmlCanvas.height);
+        }
+        if(this.stop==true){
+            this.running = false;
+        }
     }
     lose(reason){
-        console.log("lose: "+reason);
-        this.stop();
+        this.deathReason = reason;
+        this.endScreen = true; 
+        this.redraw();
+        this.stop = true;
     }
     loop(){
         //i have no idea with "this" losses sense but the .bind needs to be there
@@ -85,9 +116,11 @@ class Game{
             }                     
         }.bind(this),5)
     }
-    run(){
+    run(playercolor, showpos){
         this.platforms.push(new Platform());
         this.player = new Player()
+        this.player.color = playercolor;
+        this.player.showPos = showpos;
 
         this.loop();
     }
@@ -145,7 +178,7 @@ class Game{
 }
 class Player{
     constructor(){
-        this.showPos = true;
+        this.showPos = false;
         this.moveable = true;
         this.clip = true;
         this.pos = {
@@ -211,12 +244,6 @@ class Player{
         
     }
     update(){
-        //pos (not working)
-        if(this.showPos==true){
-            ctx.font = "5px Arial"
-            ctx.fillText("x:"+this.pos.x + " y:" + this.pos.y, 10, 10)
-        }
-
         //if player is on the ground than move slowness is the ground one
             //GRAVITY AND VELOCITY CHANGERS
             if(this.onGround == true){
@@ -267,6 +294,7 @@ class Player{
                 plat.obstacle.wall.left.sides.left, plat.obstacle.wall.left.sides.right, "wall");
             checkNewCollider(plat.obstacle.wall.right.sides.top, plat.obstacle.wall.right.sides.bottom,
                     plat.obstacle.wall.right.sides.left, plat.obstacle.wall.right.sides.right, "wall");
+            checkNewCollider(-10, 0, -10, 1000000, "roof")
             if(collider){
                 //item is object from checkNewCollider return
                 collider.forEach((item)=>{
@@ -579,7 +607,7 @@ class Platform{
         if(this.left.suitable==false && this.right.suitable==false){this.obstacle.spike.is=false;}
         if(this.obstacle.spike.is){
             if(this.left.suitable&&this.right.suitable == true){
-                if(randint(1,2)==1){this.right.suitable=false}
+                if(randint(1,100)>20){this.right.suitable=false}
                 else{this.left.suitable=false}
             }
             if(this.left.suitable){
@@ -707,4 +735,4 @@ window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
 
 //loop();
 game = new Game();
-game.run();
+game.run("orange", false);
