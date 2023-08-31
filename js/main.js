@@ -479,6 +479,7 @@ class Platform{
     constructor(){
         //PLATFORMS
         //global variables for platforms
+        this.showHitbox = false;
         this.color = "black";
         this.nextPlatformGap = 190;
         this.childcreated = false;
@@ -640,11 +641,18 @@ class Platform{
             this.obstacle.wall.right.size.w, this.obstacle.wall.right.size.h);
         }
         if(this.obstacle.spike.is = true){
-            //for(var i=1;i<this.obstacle.spike.streak+1;i++){
-                ctx.fillStyle = this.obstacle.spike.color;
-                ctx.fillRect(this.obstacle.spike.pos.x, this.obstacle.spike.pos.y, this.obstacle.spike.size.w,
-                    this.obstacle.spike.size.h);
-            //}
+            ctx.fillStyle = this.obstacle.spike.color;
+            for(var i=0;i<this.obstacle.spike.streak;i++){
+                var outsideHitbox = 30; 
+               var sizeW = (this.obstacle.spike.size.w+outsideHitbox) / this.obstacle.spike.streak;
+               var sizeH = this.obstacle.spike.size.h*1.5;
+               var posX = this.obstacle.spike.pos.x+i*sizeW+sizeW/2-outsideHitbox/2
+               var posY = this.obstacle.spike.pos.y-sizeH/3;
+               drawTriangle(posX, posY, sizeH, sizeW);
+            }
+                //ctx.fillStyle = "green";
+                //ctx.strokeRect(this.obstacle.spike.pos.x, this.obstacle.spike.pos.y, this.obstacle.spike.size.w,
+                //this.obstacle.spike.size.h);
         }
 
     }
@@ -715,7 +723,7 @@ class Platform{
 //Triangle function for obstacles
 function drawTriangle(posX, posY, sizeH, sizeW) {
     ctx.beginPath();
-    ctx.moveTo(posX, posY);
+    ctx.moveTo(posX, posY);//top corner
     ctx.lineTo(posX-sizeW/2, posY+sizeH);
     ctx.lineTo(posX+sizeW/2, posY+sizeH);
     ctx.fill();
@@ -738,6 +746,6 @@ window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
 window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
 
 
-//loop();
+//game start
 game = new Game();
 game.run("orange", false);
