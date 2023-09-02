@@ -1,6 +1,6 @@
 //VARIABLES
-var htmlCanvas = document.getElementById('c'),
-ctx = htmlCanvas.getContext('2d'),
+var htmlCanvas,
+ctx,
 raito_height = 1080,
 ratio_width = 1980,
     
@@ -8,8 +8,6 @@ scaledWidth = window.innerWidth/ratio_width,
 scaledHeight = window.innerHeight/raito_height,
 f = (scaledHeight+scaledWidth)/2;
 randint = function(min, max){return Math.ceil(Math.random() * (max - min) + min);};
-htmlCanvas.width = 1280;
-htmlCanvas.height = 720;
 
 var codes = {
     w:87,
@@ -746,6 +744,19 @@ window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
 window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
 
 
-//game start
-game = new Game();
-game.run("orange", false);
+//game starting
+function globalvariables(){
+    htmlCanvas = document.getElementById('c')
+    ctx = htmlCanvas.getContext('2d')
+    htmlCanvas.width = 1280;
+    htmlCanvas.height = 720;
+}
+function startRequest(){
+    var color = document.getElementById("color-input").value;
+    var showPos = document.getElementById("showpos").checked;
+    document.body.innerHTML = `
+    <canvas id='c' style='border:2px solid black;'></canvas>`
+    globalvariables();
+    game = new Game();
+    game.run(color, showPos);
+}
