@@ -13,13 +13,16 @@ var codes = {
     w:87,
     s:83,
     a:65,
-    d:68
+    d:68,
+    enter: 13,
+    backspace: 8
 },
 pressedKeys = {}
 
 //CLASS
 class Game{
     constructor(){
+        this.runloop = true;    
         this.deathReason = "";
         this.endScreen = false;
         this.running = true;
@@ -35,6 +38,7 @@ class Game{
         this.text = [];
     }
     update(){
+        if(this.running==false) return false;
         if(this.speed<this.maxspeed){
             this.speed += 0.00002;
         }
@@ -83,6 +87,7 @@ class Game{
             }
         }
         else{
+            //to be fixed
             ctx.fillStyle = "purple";
             ctx.font = "40px sans-serif"
             var txt = this.deathReason;
@@ -92,6 +97,11 @@ class Game{
             var txt_lenght = ctx.measureText(txt).width;
             ctx.font = "35px sans-serif";
             ctx.fillText(txt, (htmlCanvas.width/2)-txt_lenght, 400)
+            var txt = "Click Enter to restart or Backspace to refresh page";
+            var txt_lenght = ctx.measureText(txt).width;
+            var txt_height = ctx.measureText(txt).height;
+            ctx.font = "45px sans-serif";
+            ctx.fillText(txt, (htmlCanvas.width/2) - (txt_lenght/2), htmlCanvas.height-30);
             
         }
 
@@ -108,13 +118,36 @@ class Game{
         this.endScreen = true; 
         this.redraw();
         this.stop = true;
+        this.redraw();
+        this.update();
+        //this.endloop();
+    }
+    endloop(){
+        var i = true;
+        while(i==true){
+    
+        }
     }
     loop(){
         //i have no idea with "this" losses sense but the .bind needs to be there
-        setTimeout(function() {  
-            this.update()
-            this.redraw();                   
-            if (this.running==true) {
+        setTimeout(function() { 
+            if(this.running==true){
+                this.update()
+                this.redraw();  
+            }
+            //loop after game stops (while end screen)
+            else{
+                if(pressedKeys[codes.enter]==true){
+                    this.runloop = false;
+                    game = new Game();
+                    game.run(this.player.color,this.player.showPos);
+                }
+                if(pressedKeys[codes.backspace]==true){
+                    window.location.reload();
+                }
+                
+            }                  
+            if (this.runloop==true) {
                 this.loop();           
             }                     
         }.bind(this),5)
