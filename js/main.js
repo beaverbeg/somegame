@@ -79,6 +79,8 @@ class Game{
             var txt = this.player.score;
             var txt_lenght = ctx.measureText(txt).width;
             ctx.fillText(txt, (htmlCanvas.width-txt_lenght)/2, 100);
+            ctx.font = "60px sans-serif";
+            ctx.fillText("x"+this.speed.toFixed(1), 50, 100);
             //player pos
             if(this.player.showPos==true){
                 ctx.fillStyle = this.player.color;
@@ -97,7 +99,7 @@ class Game{
             var txt_lenght = ctx.measureText(txt).width;
             ctx.font = "35px sans-serif";
             ctx.fillText(txt, (htmlCanvas.width/2)-txt_lenght, 400)
-            var txt = "Click Enter to restart or Backspace to refresh page";
+            var txt = "Click Enter to restart or Backspace to go back";
             var txt_lenght = ctx.measureText(txt).width;
             var txt_height = ctx.measureText(txt).height;
             ctx.font = "45px sans-serif";
@@ -280,6 +282,9 @@ class Player{
         
     }
     update(){
+        var speedV = this.speed.vertical;
+        var speedH = this.speed.horizontal;
+        var gravityF = this.gravityForce;
         //if player is on the ground than move slowness is the ground one
             //GRAVITY AND VELOCITY CHANGERS
             if(this.onGround == true){
@@ -295,7 +300,7 @@ class Player{
             }
             //if player isn't on the ground than move slowness is the air one
             if(this.onGround == false){
-                this.velocity.y += this.gravityForce;
+                this.velocity.y += gravityF;
                 //for left (velocity on -)
                 if(this.velocity.x>0){
                     this.velocity.x -= this.airmoveSlowness;
@@ -486,7 +491,7 @@ class Player{
                         //resets velocity to provite new one
                         this.velocity.y = 0;
 
-                        this.velocity.y -= this.speed.vertical;
+                        this.velocity.y -= speedV;
                         this.onGround = false;
                     }
                 }
@@ -494,13 +499,13 @@ class Player{
             if(pressedKeys[codes.a]==true){
                 //only when player hasn't reached horizontal max speed (for left -)
                 if(this.maxSpeed.horizontalMinus<this.velocity.x){
-                    this.velocity.x -= this.speed.horizontal;
+                    this.velocity.x -= speedH;
                 }
             }
             if(pressedKeys[codes.d]==true){
                 //only when player hasn't reached horizontal max speed (for right +)
                 if(this.maxSpeed.horizontalPlus>this.velocity.x){
-                    this.velocity.x += this.speed.horizontal;
+                    this.velocity.x += speedH;
                 }
             }
         }
@@ -620,7 +625,7 @@ class Platform{
         //hitbox isnt fit in a visual spike
         //so variables in draw function have to be diffrent
         this.obstacle.spike.size.h = 40;
-        this.obstacle.spike.size.w = 60*this.obstacle.spike.streak;
+        this.obstacle.spike.size.w = 55*this.obstacle.spike.streak;
         this.obstacle.spike.pos.x = undefined;
         this.obstacle.spike.pos.y = this.left.pos.y-this.obstacle.spike.size.h;
         this.obstacle.spike.sides.bottom = this.obstacle.spike.pos.y + this.obstacle.spike.size.h;
@@ -674,7 +679,7 @@ class Platform{
         if(this.obstacle.spike.is = true){
             ctx.fillStyle = this.obstacle.spike.color;
             for(var i=0;i<this.obstacle.spike.streak;i++){
-                var outsideHitbox = 30; 
+                var outsideHitbox = 40; 
                var sizeW = (this.obstacle.spike.size.w+outsideHitbox) / this.obstacle.spike.streak;
                var sizeH = this.obstacle.spike.size.h*1.5;
                var posX = this.obstacle.spike.pos.x+i*sizeW+sizeW/2-outsideHitbox/2
